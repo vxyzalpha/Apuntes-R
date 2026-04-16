@@ -1,1 +1,70 @@
-<h1>Hola GitHub Pages</h1>
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Apuntes interactivos R</title>
+  <style>
+    body { font-family: Arial; margin: 40px; }
+    pre { background: #f4f4f4; padding: 10px; }
+    button { margin-bottom: 5px; }
+  </style>
+</head>
+
+<body>
+
+<h1>Apuntes interactivos con R (webR)</h1>
+
+<p>Ejecuta código R directamente en el navegador:</p>
+
+<pre><code class="r">
+x <- rnorm(10)
+mean(x)
+</code></pre>
+
+<pre><code class="r">
+n <- 100
+hist(rnorm(n))
+</code></pre>
+
+<script type="module">
+import { WebR } from "https://webr.r-wasm.org/latest/webr.mjs";
+
+const webR = new WebR();
+await webR.init();
+
+// buscar bloques R
+const blocks = document.querySelectorAll("pre code");
+
+blocks.forEach((block) => {
+  const code = block.innerText;
+
+  const btn = document.createElement("button");
+  btn.textContent = "▶ Run";
+
+  btn.onclick = async () => {
+    try {
+      const result = await webR.evalR(code);
+      const output = await result.toString();
+
+      let out = block.parentElement.querySelector(".out");
+      if (!out) {
+        out = document.createElement("div");
+        out.className = "out";
+        out.style.background = "#eef";
+        out.style.padding = "10px";
+        out.style.marginTop = "5px";
+        block.parentElement.appendChild(out);
+      }
+
+      out.innerText = output;
+    } catch (e) {
+      alert(e);
+    }
+  };
+
+  block.parentElement.insertBefore(btn, block);
+});
+</script>
+
+</body>
+</html>
