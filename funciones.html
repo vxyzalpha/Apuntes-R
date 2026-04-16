@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Funciones en R — Apuntes Interactivos</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #faf9f6;
+  --bg2:      #f2f0eb;
+  --surface:  #ffffff;
+  --border:   #e2ddd6;
+  --text:     #1a1714;
+  --muted:    #6b6560;
+  --accent:   #2563a8;
+  --accent-soft: #eef4fc;
+  --code-bg:  #1e1e2e;
+  --code-text:#cdd6f4;
+  --green:    #166534;
+  --green-bg: #f0fdf4;
+  --yellow:   #92400e;
+  --yellow-bg:#fffbeb;
+  --red:      #991b1b;
+  --red-bg:   #fef2f2;
+  --sidebar-w:256px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);font-size:16px;line-height:1.75;display:flex;min-height:100vh}
+
+/* ── SIDEBAR ── */
+#sidebar{width:var(--sidebar-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);position:fixed;top:0;left:0;display:flex;flex-direction:column;overflow-y:auto;z-index:100}
+.sb-head{padding:28px 24px 22px;border-bottom:1px solid var(--border)}
+.sb-logo{font-family:'DM Serif Display',serif;font-size:19px;color:var(--text);line-height:1.25}
+.sb-logo span{color:var(--accent)}
+.sb-sub{font-size:10.5px;color:var(--muted);letter-spacing:.09em;text-transform:uppercase;margin-top:5px}
+.sb-other{margin:18px 20px 0;padding:12px 14px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)}
+.sb-other-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.sb-other a{display:block;font-size:12.5px;color:var(--accent);text-decoration:none;padding:3px 0}
+.sb-other a:hover{text-decoration:underline}
+.nav-group{padding:16px 0 6px 24px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 24px;font-size:13.5px;color:var(--muted);cursor:pointer;border-left:2px solid transparent;transition:all .15s;text-decoration:none;user-select:none}
+.nav-item:hover{color:var(--text);background:var(--bg)}
+.nav-item.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-soft);font-weight:500}
+.nav-dot{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.45;flex-shrink:0}
+.nav-item.active .nav-dot{opacity:1}
+.sb-footer{margin-top:auto;padding:20px 24px;border-top:1px solid var(--border)}
+.sb-prog-label{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:7px}
+.sb-prog-track{height:3px;background:var(--bg2);border-radius:2px}
+.sb-prog-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s ease;width:0%}
+
+/* ── MAIN ── */
+#main{margin-left:var(--sidebar-w);flex:1}
+.page{display:none;max-width:800px;margin:0 auto;padding:64px 60px 100px;animation:fadeIn .25s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── TYPOGRAPHY ── */
+.eyebrow{font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+h1{font-family:'DM Serif Display',serif;font-size:42px;line-height:1.08;color:var(--text);margin-bottom:18px}
+h2{font-family:'DM Serif Display',serif;font-size:26px;color:var(--text);margin:52px 0 16px;padding-top:40px;border-top:1px solid var(--border)}
+h2:first-of-type{border-top:none;margin-top:28px;padding-top:0}
+h3{font-size:16px;font-weight:600;color:var(--text);margin:28px 0 10px}
+p{margin-bottom:14px;color:#2c2820}
+.lead{font-size:17.5px;color:var(--muted);line-height:1.65;margin-bottom:36px}
+ul,ol{padding-left:22px;margin-bottom:14px}
+li{margin-bottom:6px;font-size:15.5px}
+p code,li code,h3 code{font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--bg2);border:1px solid var(--border);padding:2px 6px;border-radius:4px;color:var(--accent)}
+strong{font-weight:600}
+hr{border:none;border-top:1px solid var(--border);margin:36px 0}
+
+/* ── CALLOUTS ── */
+.callout{border-left:3px solid;padding:14px 18px;margin:20px 0;border-radius:0 8px 8px 0;font-size:15px}
+.callout-title{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px}
+.callout p{margin:0;color:inherit}
+.callout.key  {border-color:var(--accent);background:var(--accent-soft)}.callout.key  .callout-title{color:var(--accent)}
+.callout.tip  {border-color:var(--green); background:var(--green-bg)} .callout.tip  .callout-title{color:var(--green)}
+.callout.warn {border-color:var(--yellow);background:var(--yellow-bg)}.callout.warn .callout-title{color:var(--yellow)}
+.callout.err  {border-color:var(--red);   background:var(--red-bg)}  .callout.err  .callout-title{color:var(--red)}
+
+/* ── CODE CELL ── */
+.cell{margin:24px 0;border-radius:10px;overflow:hidden;border:1px solid #2a2a3e;box-shadow:0 2px 12px rgba(0,0,0,.1)}
+.cell-head{background:#252235;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.cell-meta{display:flex;align-items:center;gap:8px}
+.cell-filename{font-family:'JetBrains Mono',monospace;font-size:11px;color:#6c6f8a;letter-spacing:.04em}
+.cell-badge{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:3px}
+.badge-exec{background:#1e3a2e;color:#4ade80}
+.badge-read{background:#2e2418;color:#fb923c}
+.cell-actions{display:flex;gap:7px;align-items:center}
+.btn-run{display:flex;align-items:center;gap:5px;background:var(--accent);color:#fff;border:none;padding:5px 13px;border-radius:5px;font-family:'Outfit',sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;cursor:pointer;transition:opacity .15s,transform .1s}
+.btn-run:hover{opacity:.85}.btn-run:active{transform:scale(.97)}.btn-run:disabled{opacity:.4;cursor:not-allowed}
+.btn-copy{background:transparent;color:#6c6f8a;border:1px solid #3a3a50;padding:4px 11px;border-radius:5px;font-family:'Outfit',sans-serif;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s}
+.btn-copy:hover{color:#cdd6f4;border-color:#6c6f8a}
+pre.code-in{background:var(--code-bg);padding:18px 20px;margin:0;font-family:'JetBrains Mono',monospace;font-size:13.5px;line-height:1.7;overflow-x:auto;outline:none;caret-color:#fff;color:var(--code-text);white-space:pre;tab-size:2;min-height:52px}
+pre.code-in[contenteditable="true"]:focus{box-shadow:inset 0 0 0 2px rgba(37,99,168,.35)}
+.out-wrap{background:#13131f;border-top:1px solid #2a2a3e;display:none}
+.out-wrap.show{display:block}
+.out-label{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#3a3a50;padding:7px 20px 3px;letter-spacing:.1em;text-transform:uppercase}
+.out-content{padding:2px 20px 14px;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.7;color:#a6adc8;white-space:pre-wrap;word-break:break-word}
+.out-content.err{color:#f38ba8}
+
+/* ── WEBR STATUS ── */
+#webr-bar{position:fixed;bottom:0;left:var(--sidebar-w);right:0;background:#1e1e2e;border-top:1px solid #2a2a3e;padding:10px 24px;display:flex;align-items:center;gap:10px;font-size:12px;color:#6c6f8a;font-family:'Outfit',sans-serif;z-index:200;transition:opacity .3s}
+#webr-bar.hidden{opacity:0;pointer-events:none}
+.webr-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0;animation:blink 1.2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+#webr-bar.ready .webr-dot{background:#4ade80;animation:none}
+
+/* ── SYNTAX ── */
+.kw{color:#cba6f7}.fn{color:#89b4fa}.st{color:#a6e3a1}.nm{color:#fab387}.cm{color:#45475a;font-style:italic}.op{color:#cdd6f4}.sp{color:#f38ba8}
+
+/* ── TABLES ── */
+.tbl{width:100%;border-collapse:collapse;margin:18px 0;font-size:14.5px}
+.tbl th{background:var(--text);color:var(--bg);font-weight:600;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;padding:10px 14px;text-align:left}
+.tbl td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:top}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--bg2)}
+.tbl td:first-child{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--accent);white-space:nowrap}
+
+/* ── CONCEPT CARDS ── */
+.card-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px}
+.card h4{font-size:14.5px;font-weight:600;margin-bottom:6px}
+.card p{font-size:13.5px;color:var(--muted);margin:0;line-height:1.5}
+
+/* ── ANATOMY DIAGRAM ── */
+.anatomy{background:var(--code-bg);border-radius:10px;padding:24px;margin:20px 0;font-family:'JetBrains Mono',monospace;font-size:13.5px;line-height:1.8;position:relative}
+.anatomy-label{position:absolute;right:18px;top:12px;font-family:'Outfit',sans-serif;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#45475a}
+.anat-comment{color:#45475a;font-style:italic}
+.anat-bracket{color:#585b70}
+.anat-hl{background:rgba(137,180,250,.12);border-radius:3px;padding:1px 3px}
+
+/* ── QUIZ ── */
+.quiz{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:22px;margin:24px 0}
+.quiz-q{font-weight:600;font-size:15px;margin-bottom:16px;line-height:1.5}
+.quiz-opts{display:flex;flex-direction:column;gap:7px}
+.quiz-opt{display:flex;align-items:flex-start;gap:11px;padding:11px 15px;background:var(--bg);border:1.5px solid var(--border);border-radius:7px;cursor:pointer;font-size:14.5px;transition:border-color .15s,background .15s;user-select:none}
+.quiz-opt:hover:not(.locked){border-color:#b0a898;background:#f0ece4}
+.opt-l{font-size:11px;font-weight:700;color:var(--muted);width:20px;flex-shrink:0;padding-top:2px}
+.quiz-opt.correct{border-color:var(--green);background:var(--green-bg)}.quiz-opt.correct .opt-l{color:var(--green)}
+.quiz-opt.wrong{border-color:var(--red);background:var(--red-bg);opacity:.6}
+.quiz-fb{font-size:13.5px;padding:11px 14px;border-radius:7px;margin-top:12px;display:none;line-height:1.5}
+.quiz-fb.show{display:block}.quiz-fb.ok{background:var(--green-bg);color:var(--green);border:1px solid #bbf7d0}.quiz-fb.no{background:var(--red-bg);color:var(--red);border:1px solid #fecaca}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:60px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--text);color:var(--bg);font-size:12px;font-weight:500;padding:8px 18px;border-radius:6px;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── MOBILE ── */
+@media(max-width:768px){:root{--sidebar-w:0px}#sidebar{display:none}#main{margin-left:0}.page{padding:32px 22px 80px}h1{font-size:30px}.card-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sb-head">
+    <div class="sb-logo">Funciones<br>en <span>R</span></div>
+    <div class="sb-sub">Apuntes interactivos</div>
+  </div>
+  <div class="sb-other">
+    <div class="sb-other-label">También disponible</div>
+    <a href="scope.html">→ Alcance de variables</a>
+  </div>
+
+  <div class="nav-group">Fundamentos</div>
+  <a class="nav-item active" onclick="goTo('intro')"><span class="nav-dot"></span>¿Qué es una función?</a>
+  <a class="nav-item" onclick="goTo('sintaxis')"><span class="nav-dot"></span>Sintaxis y anatomía</a>
+  <a class="nav-item" onclick="goTo('argumentos')"><span class="nav-dot"></span>Argumentos</a>
+
+  <div class="nav-group">En profundidad</div>
+  <a class="nav-item" onclick="goTo('retorno')"><span class="nav-dot"></span>Valor de retorno</a>
+  <a class="nav-item" onclick="goTo('funciones-como-objetos')"><span class="nav-dot"></span>Funciones como objetos</a>
+  <a class="nav-item" onclick="goTo('errores')"><span class="nav-dot"></span>Errores frecuentes</a>
+
+  <div class="nav-group">Práctica</div>
+  <a class="nav-item" onclick="goTo('ejercicios')"><span class="nav-dot"></span>Ejercicios</a>
+
+  <div class="sb-footer">
+    <div class="sb-prog-label"><span>Progreso</span><span id="pct">0 / 7</span></div>
+    <div class="sb-prog-track"><div class="sb-prog-fill" id="prog"></div></div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main id="main">
+
+<!-- ══ 01 QUÉ ES UNA FUNCIÓN ══ -->
+<div class="page active" id="p-intro">
+  <div class="eyebrow">Sección 01</div>
+  <h1>¿Qué es una función?</h1>
+  <p class="lead">Una función es un bloque de código reutilizable que recibe entradas, realiza operaciones y devuelve un resultado. Es la unidad fundamental de organización en R.</p>
+
+  <div class="callout key">
+    <div class="callout-title">Idea central</div>
+    <p>En R, <strong>todo lo que ocurre es una llamada a una función</strong> — incluso <code>+</code>, <code>[</code> o <code>if</code>. Entender las funciones es entender el lenguaje.</p>
+  </div>
+
+  <h2>¿Para qué sirven?</h2>
+  <div class="card-row">
+    <div class="card"><h4>♻️ Reutilización</h4><p>Escribe la lógica una vez, úsala cien veces. Sin copiar y pegar código.</p></div>
+    <div class="card"><h4>📦 Encapsulación</h4><p>Las variables internas no "escapan". Cada llamada tiene su propio espacio limpio.</p></div>
+    <div class="card"><h4>🧪 Testabilidad</h4><p>Una función con entradas y salidas claras es fácil de probar y depurar.</p></div>
+    <div class="card"><h4>📖 Legibilidad</h4><p>Un buen nombre de función hace el código auto-explicativo.</p></div>
+  </div>
+
+  <h2>Tu primera función</h2>
+  <p>El ejemplo más sencillo posible. Cada bloque tiene <code>rm(list=ls())</code> al inicio para empezar con el workspace completamente limpio.</p>
+
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">ejemplo_01.R</span><span class="cell-badge badge-exec">Ejecutable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())  <span class="cm"># limpia el workspace</span>
+
+<span class="cm"># Definir la función</span>
+<span class="fn">saludar</span> <span class="op">&lt;-</span> <span class="kw">function</span>(nombre) {
+  <span class="fn">paste</span>(<span class="st">"Hola,"</span>, nombre)
+}
+
+<span class="cm"># Llamar a la función</span>
+<span class="fn">saludar</span>(<span class="st">"Ana"</span>)
+<span class="fn">saludar</span>(<span class="st">"Luis"</span>)</pre>
+    <div class="out-wrap" id="o-intro-1"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+
+  <div class="callout tip">
+    <div class="callout-title">Convención de nombres</div>
+    <p>En R se usan nombres en <code>snake_case</code> para funciones: <code>calcular_media</code>, <code>limpiar_datos</code>. Usa verbos que describan la acción.</p>
+  </div>
+
+  <h2>Funciones ya existentes vs. propias</h2>
+  <p>R tiene miles de funciones predefinidas (<code>mean()</code>, <code>sum()</code>, <code>paste()</code>…). Las funciones que defines tú funcionan exactamente igual.</p>
+
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">ejemplo_02.R</span><span class="cell-badge badge-exec">Ejecutable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="cm"># Función propia que usa funciones de R</span>
+<span class="fn">resumir</span> <span class="op">&lt;-</span> <span class="kw">function</span>(x) {
+  <span class="fn">cat</span>(<span class="st">"Media:   "</span>, <span class="fn">mean</span>(x),   <span class="st">"\n"</span>)
+  <span class="fn">cat</span>(<span class="st">"Mínimo:  "</span>, <span class="fn">min</span>(x),    <span class="st">"\n"</span>)
+  <span class="fn">cat</span>(<span class="st">"Máximo:  "</span>, <span class="fn">max</span>(x),    <span class="st">"\n"</span>)
+  <span class="fn">cat</span>(<span class="st">"Desviac: "</span>, <span class="fn">sd</span>(x),     <span class="st">"\n"</span>)
+}
+
+<span class="nm">notas</span> <span class="op">&lt;-</span> <span class="fn">c</span>(<span class="nm">7.5</span>, <span class="nm">8</span>, <span class="nm">6</span>, <span class="nm">9</span>, <span class="nm">5.5</span>, <span class="nm">8.5</span>)
+<span class="fn">resumir</span>(notas)</pre>
+    <div class="out-wrap" id="o-intro-2"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+</div>
+
+<!-- ══ 02 SINTAXIS ══ -->
+<div class="page" id="p-sintaxis">
+  <div class="eyebrow">Sección 02</div>
+  <h1>Sintaxis y anatomía</h1>
+  <p class="lead">Toda función en R tiene la misma estructura. Conocerla te permite leer cualquier código con soltura.</p>
+
+  <h2>Las partes de una función</h2>
+  <div class="anatomy">
+    <span class="anatomy-label">anatomía</span>
+<span class="nm">nombre</span> <span class="op">&lt;-</span> <span class="kw">function</span>(<span class="nm">arg1</span>, <span class="nm">arg2</span> <span class="op">=</span> <span class="nm">valor_por_defecto</span>) {
+  <span class="cm"># cuerpo: las instrucciones</span>
+  <span class="nm">resultado</span> <span class="op">&lt;-</span> <span class="nm">arg1</span> <span class="op">+</span> <span class="nm">arg2</span>
+  <span class="nm">resultado</span>   <span class="cm"># última expresión = valor devuelto</span>
+}</div>
+
+  <table class="tbl">
+    <thead><tr><th>Parte</th><th>Qué es</th><th>Ejemplo</th></tr></thead>
+    <tbody>
+      <tr><td>nombre</td><td>Identificador para llamar a la función después</td><td><code>calcular_iva</code></td></tr>
+      <tr><td>function()</td><td>Palabra reservada que crea la función</td><td><code>function(...)</code></td></tr>
+      <tr><td>argumentos</td><td>Variables de entrada, con o sin valor por defecto</td><td><code>precio, tasa = 0.21</code></td></tr>
+      <tr><td>cuerpo { }</td><td>Las instrucciones que ejecuta la función</td><td>cálculos, llamadas…</td></tr>
+      <tr><td>retorno</td><td>La última expresión evaluada (o <code>return()</code>)</td><td><code>precio * tasa</code></td></tr>
+    </tbody>
+  </table>
+
+  <h2>Función de una línea (sin llaves)</h2>
+  <p>Si el cuerpo es una sola expresión, puedes omitir las llaves. Muy común en funciones cortas.</p>
+
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">sintaxis_01.R</span><span class="cell-badge badge-exec">Ejecutable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="cm"># Con llaves (forma general)</span>
+<span class="fn">cuadrado</span> <span class="op">&lt;-</span> <span class="kw">function</span>(x) {
+  x <span class="op">^</span> <span class="nm">2</span>
+}
+
+<span class="cm"># Sin llaves (una sola expresión)</span>
+<span class="fn">cubo</span> <span class="op">&lt;-</span> <span class="kw">function</span>(x) x <span class="op">^</span> <span class="nm">3</span>
+
+<span class="cm"># Sintaxis moderna con \() (R 4.1+)</span>
+<span class="fn">doble</span> <span class="op">&lt;-</span> \(x) x <span class="op">*</span> <span class="nm">2</span>
+
+<span class="fn">cuadrado</span>(<span class="nm">4</span>)
+<span class="fn">cubo</span>(<span class="nm">3</span>)
+<span class="fn">doble</span>(<span class="nm">7</span>)</pre>
+    <div class="out-wrap" id="o-sint-1"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+
+  <h2>Funciones anónimas</h2>
+  <p>Una función sin nombre, usada en el momento. Muy habitual en combinación con <code>sapply</code>, <code>lapply</code> o la pipe <code>|&gt;</code>.</p>
+
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">sintaxis_02.R</span><span class="cell-badge badge-exec">Ejecutable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="nm">numeros</span> <span class="op">&lt;-</span> <span class="fn">c</span>(<span class="nm">1</span>, <span class="nm">4</span>, <span class="nm">9</span>, <span class="nm">16</span>, <span class="nm">25</span>)
+
+<span class="cm"># Función anónima con function()</span>
+<span class="fn">sapply</span>(numeros, <span class="kw">function</span>(x) <span class="fn">sqrt</span>(x))
+
+<span class="cm"># Función anónima con \() (más corta)</span>
+<span class="fn">sapply</span>(numeros, \(x) <span class="fn">sqrt</span>(x))
+
+<span class="cm"># Con la pipe nativa |></span>
+numeros <span class="op">|&gt;</span> <span class="fn">sapply</span>(\(x) x <span class="op">+</span> <span class="nm">100</span>)</pre>
+    <div class="out-wrap" id="o-sint-2"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+
+  <div class="callout tip">
+    <div class="callout-title">Cuándo usar función anónima</div>
+    <p>Úsala cuando la lógica es tan simple que nombrarla no añade claridad. Si la usas más de una vez, dale nombre.</p>
+  </div>
+</div>
+
+<!-- ══ 03 ARGUMENTOS ══ -->
+<div class="page" id="p-argumentos">
+  <div class="eyebrow">Sección 03</div>
+  <h1>Argumentos</h1>
+  <p class="lead">Los argumentos son las entradas de una función. R ofrece gran flexibilidad: argumentos por posición, por nombre, con valores por defecto, y un número variable de ellos.</p>
+
+  <h2>Argumentos posicionales vs. nombrados</h2>
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">args_01.R</span><span class="cell-badge badge-exec">Ejecutable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="fn">potencia</span> <span class="op">&lt;-</span> <span class="kw">function</span>(base, exponente) {
+  base <span class="op">^</span> exponente
+}
+
+<span class="cm"># Por posición: base=2, exponente=3</span>
+<span class="fn">potencia</span>(<span class="nm">2</span>, <span class="nm">3</span>)
+
+<span class="cm"># Por nombre: el orden no importa</span>
+<span class="fn">potencia</span>(exponente <span class="op">=</span> <span class="nm">3</span>, base <span class="op">=</span> <span class="nm">2</span>)
+
+<span class="cm"># Mezcla: primero posicional, luego nombrado</span>
+<span class="fn">potencia</span>(<span class="nm">2</span>, exponente <span class="op">=</span> <span class="nm">10</span>)</pre>
+    <div class="out-wrap" id="o-args-1"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+
+  <h2>Valores por defecto</h2>
+  <p>Un argumento con valor por defecto es opcional: si no se proporciona, se usa el valor predefinido.</p>
+
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">args_02.R</span><span class="cell-badge badge-exec">Ejecutable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="fn">calcular_iva</span> <span class="op">&lt;-</span> <span class="kw">function</span>(precio, tasa <span class="op">=</span> <span class="nm">0.21</span>) {
+  precio <span class="op">*</span> tasa
+}
+
+<span class="fn">calcular_iva</span>(<span class="nm">100</span>)          <span class="cm"># usa tasa = 0.21 por defecto</span>
+<span class="fn">calcular_iva</span>(<span class="nm">100</span>, <span class="nm">0.10</span>)    <span class="cm"># sobreescribe con tasa = 0.10</span>
+<span class="fn">calcular_iva</span>(<span class="nm">200</span>)          <span class="cm"># 200 * 0.21</span></pre>
+    <div class="out-wrap" id="o-args-2"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+
+  <h2>El argumento especial <code>...</code> (dot-dot-dot)</h2>
+  <p><code>...</code> permite pasar un número variable de argumentos, o reenviarlos a otra función sin nombrarlos todos.</p>
+
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">args_03.R</span><span class="cell-badge badge-exec">Ejecutable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="cm"># Número variable de argumentos</span>
+<span class="fn">mi_suma</span> <span class="op">&lt;-</span> <span class="kw">function</span>(...) {
+  <span class="nm">args</span> <span class="op">&lt;-</span> <span class="fn">c</span>(...)
+  <span class="fn">sum</span>(args)
+}
+
+<span class="fn">mi_suma</span>(<span class="nm">1</span>, <span class="nm">2</span>, <span class="nm">3</span>)
+<span class="fn">mi_suma</span>(<span class="nm">10</span>, <span class="nm">20</span>, <span class="nm">30</span>, <span class="nm">40</span>)
+
+<span class="cm"># Reenviar ... a otra función (muy común)</span>
+<span class="fn">mi_cat</span> <span class="op">&lt;-</span> <span class="kw">function</span>(...) {
+  <span class="fn">cat</span>(<span class="st">"→ "</span>, ...)  <span class="cm"># pasa todo a cat()</span>
+}
+
+<span class="fn">mi_cat</span>(<span class="st">"hola"</span>, <span class="st">"mundo"</span>, <span class="st">"\n"</span>)</pre>
+    <div class="out-wrap" id="o-args-3"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+
+  <div class="callout warn">
+    <div class="callout-title">Cuidado con ...</div>
+    <p>Los argumentos en <code>...</code> no tienen nombre fijo, lo que dificulta la detección de errores tipográficos. Úsalo cuando realmente necesites flexibilidad; para casos comunes, es mejor nombrar los argumentos explícitamente.</p>
+  </div>
+
+  <!-- QUIZ -->
+  <h2>Comprueba lo que sabes</h2>
+  <div class="quiz" id="q-args">
+    <div class="quiz-q">¿Qué devuelve <code>potencia(exponente = 2, base = 3)</code> si la función es <code>function(base, exponente) base ^ exponente</code>?</div>
+    <div class="quiz-opts">
+      <div class="quiz-opt" onclick="quiz('q-args',this,false)"><span class="opt-l">A</span> 8 &nbsp;(porque 2³)</div>
+      <div class="quiz-opt" onclick="quiz('q-args',this,true)"> <span class="opt-l">B</span> 9 &nbsp;(porque 3² — los nombres anulan el orden)</div>
+      <div class="quiz-opt" onclick="quiz('q-args',this,false)"><span class="opt-l">C</span> Error — no se pueden mezclar nombres y posición</div>
+    </div>
+    <div class="quiz-fb" id="qfb-q-args"></div>
+  </div>
+</div>
+
+<!-- ══ 04 RETORNO ══ -->
+<div class="page" id="p-retorno">
+  <div class="eyebrow">Sección 04</div>
+  <h1>Valor de retorno</h1>
+  <p class="lead">Una función siempre devuelve algo. Entender exactamente qué devuelve — y cómo — es esencial para escribir código predecible.</p>
+
+  <h2>Retorno implícito</h2>
+  <p>En R, una función devuelve automáticamente el valor de su <strong>última expresión evaluada</strong>. No hace falta escribir <code>return()</code>.</p>
+
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">retorno_01.R</span><span class="cell-badge badge-exec">Ejecutable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="fn">maximo</span> <span class="op">&lt;-</span> <span class="kw">function</span>(a, b) {
+  <span class="kw">if</span> (a <span class="op">&gt;</span> b) a <span class="kw">else</span> b   <span class="cm"># última expresión = retorno</span>
+}
+
+<span class="fn">maximo</span>(<span class="nm">5</span>, <span class="nm">12</span>)
+<span class="fn">maximo</span>(<span class="nm">8</span>, <span class="nm">3</span>)
+
+<span class="cm"># Guardar el resultado</span>
+<span class="nm">resultado</span> <span class="op">&lt;-</span> <span class="fn">maximo</span>(<span class="nm">7</span>, <span class="nm">2</span>)
+<span class="fn">cat</span>(<span class="st">"El máximo es:"</span>, resultado, <span class="st">"\n"</span>)</pre>
+    <div class="out-wrap" id="o-ret-1"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+
+  <h2>Retorno explícito con <code>return()</code></h2>
+  <p><code>return()</code> interrumpe la función inmediatamente y devuelve el valor indicado. Útil para salidas anticipadas (guardianes).</p>
+
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">retorno_02.R</span><span class="cell-badge badge-exec">Ejecutable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="fn">dividir</span> <span class="op">&lt;-</span> <span class="kw">function</span>(a, b) {
+  <span class="kw">if</span> (b <span class="op">==</span> <span class="nm">0</span>) {
+    <span class="fn">warning</span>(<span class="st">"División por cero"</span>)
+    <span class="kw">return</span>(<span class="kw">NA</span>)   <span class="cm"># sale aquí si b == 0</span>
+  }
+  a <span class="op">/</span> b          <span class="cm"># retorno implícito en caso normal</span>
+}
+
+<span class="fn">dividir</span>(<span class="nm">10</span>, <span class="nm">2</span>)
+<span class="fn">dividir</span>(<span class="nm">10</span>, <span class="nm">0</span>)</pre>
+    <div class="out-wrap" id="o-ret-2"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+
+  <h2>Devolver múltiples valores con una lista</h2>
+  <p>R solo puede devolver un objeto, pero ese objeto puede ser una <code>list</code> con todo lo que necesites.</p>
+
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">retorno_03.R</span><span class="cell-badge badge-exec">Ejecutable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="fn">estadisticas</span> <span class="op">&lt;-</span> <span class="kw">function</span>(x) {
+  <span class="fn">list</span>(
+    media   <span class="op">=</span> <span class="fn">mean</span>(x),
+    mediana <span class="op">=</span> <span class="fn">median</span>(x),
+    sd      <span class="op">=</span> <span class="fn">sd</span>(x),
+    n       <span class="op">=</span> <span class="fn">length</span>(x)
+  )
+}
+
+<span class="nm">res</span> <span class="op">&lt;-</span> <span class="fn">estadisticas</span>(<span class="fn">c</span>(<span class="nm">4</span>, <span class="nm">7</span>, <span class="nm">2</span>, <span class="nm">9</span>, <span class="nm">5</span>))
+res$media
+res$sd
+res$n</pre>
+    <div class="out-wrap" id="o-ret-3"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+
+  <div class="callout key">
+    <div class="callout-title">Retorno invisible</div>
+    <p>Usar <code>invisible(x)</code> devuelve <code>x</code> pero no lo imprime automáticamente en la consola. Lo usan funciones como <code>ggplot()</code> que devuelven un objeto sin querer inundar la consola. Puedes asignarlo igual: <code>p &lt;- ggplot(...)</code>.</p>
+  </div>
+
+  <div class="quiz" id="q-ret">
+    <div class="quiz-q">Una función tiene este cuerpo: <code>x &lt;- 10; y &lt;- 20; x + y</code>. ¿Qué devuelve?</div>
+    <div class="quiz-opts">
+      <div class="quiz-opt" onclick="quiz('q-ret',this,false)"><span class="opt-l">A</span> <code>NULL</code> — no tiene <code>return()</code></div>
+      <div class="quiz-opt" onclick="quiz('q-ret',this,true)"> <span class="opt-l">B</span> <code>30</code> — la última expresión evaluada</div>
+      <div class="quiz-opt" onclick="quiz('q-ret',this,false)"><span class="opt-l">C</span> <code>20</code> — el valor de la última asignación</div>
+    </div>
+    <div class="quiz-fb" id="qfb-q-ret"></div>
+  </div>
+</div>
+
+<!-- ══ 05 FUNCIONES COMO OBJETOS ══ -->
+<div class="page" id="p-funciones-como-objetos">
+  <div class="eyebrow">Sección 05</div>
+  <h1>Funciones como objetos</h1>
+  <p class="lead">En R las funciones son objetos de primera clase. Puedes guardarlas en variables, pasarlas como argumentos, devolverlas desde otras funciones y meterlas en listas.</p>
+
+  <h2>Pasar funciones como argumentos</h2>
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">hof_01.R</span><span class="cell-badge badge-exec">Ejecutable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="cm"># Una función que recibe otra función como argumento</span>
+<span class="fn">aplicar_a_vector</span> <span class="op">&lt;-</span> <span class="kw">function</span>(v, f) {
+  <span class="fn">sapply</span>(v, f)
+}
+
+<span class="nm">numeros</span> <span class="op">&lt;-</span> <span class="fn">c</span>(<span class="nm">1</span>, <span class="nm">4</span>, <span class="nm">9</span>, <span class="nm">16</span>)
+
+<span class="fn">aplicar_a_vector</span>(numeros, sqrt)
+<span class="fn">aplicar_a_vector</span>(numeros, log)
+<span class="fn">aplicar_a_vector</span>(numeros, \(x) x <span class="op">*</span> <span class="nm">2</span> <span class="op">+</span> <span class="nm">1</span>)</pre>
+    <div class="out-wrap" id="o-hof-1"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+
+  <h2>Devolver funciones (fábricas)</h2>
+  <p>Una función puede devolver otra función. Esto se llama <strong>fábrica de funciones</strong> y es la base de los closures (tema de la siguiente página).</p>
+
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">hof_02.R</span><span class="cell-badge badge-exec">Ejecutable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="cm"># Fábrica: genera una función multiplicadora</span>
+<span class="fn">crear_multiplicador</span> <span class="op">&lt;-</span> <span class="kw">function</span>(factor) {
+  <span class="kw">function</span>(x) x <span class="op">*</span> factor
+}
+
+<span class="nm">doble</span>  <span class="op">&lt;-</span> <span class="fn">crear_multiplicador</span>(<span class="nm">2</span>)
+<span class="nm">triple</span> <span class="op">&lt;-</span> <span class="fn">crear_multiplicador</span>(<span class="nm">3</span>)
+
+<span class="fn">doble</span>(<span class="nm">5</span>)    <span class="cm"># 10</span>
+<span class="fn">triple</span>(<span class="nm">5</span>)   <span class="cm"># 15</span>
+<span class="fn">doble</span>(<span class="fn">triple</span>(<span class="nm">4</span>))  <span class="cm"># 24: composición</span></pre>
+    <div class="out-wrap" id="o-hof-2"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+
+  <h2>Funciones en listas</h2>
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">hof_03.R</span><span class="cell-badge badge-exec">Ejecutable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="cm"># Lista de funciones: aplicar cada una al mismo dato</span>
+<span class="nm">transformaciones</span> <span class="op">&lt;-</span> <span class="fn">list</span>(
+  raiz    <span class="op">=</span> sqrt,
+  log     <span class="op">=</span> log,
+  inverso <span class="op">=</span> \(x) <span class="nm">1</span> <span class="op">/</span> x
+)
+
+<span class="nm">x</span> <span class="op">&lt;-</span> <span class="nm">100</span>
+<span class="fn">lapply</span>(transformaciones, \(f) <span class="fn">f</span>(x))</pre>
+    <div class="out-wrap" id="o-hof-3"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+
+  <div class="callout key">
+    <div class="callout-title">Funciones de orden superior</div>
+    <p>Las funciones que reciben o devuelven otras funciones se llaman <strong>funciones de orden superior</strong>. <code>sapply</code>, <code>lapply</code>, <code>Map</code>, <code>Filter</code> y <code>Reduce</code> son los ejemplos más usados en R base.</p>
+  </div>
+</div>
+
+<!-- ══ 06 ERRORES FRECUENTES ══ -->
+<div class="page" id="p-errores">
+  <div class="eyebrow">Sección 06</div>
+  <h1>Errores frecuentes</h1>
+  <p class="lead">Los mismos errores aparecen una y otra vez al aprender funciones. Reconocerlos en la consola ahorra mucho tiempo.</p>
+
+  <h2>Error 1 — olvidar el paréntesis al llamar</h2>
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">error_01.R</span><span class="cell-badge badge-exec">Ejecutable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="fn">saludar</span> <span class="op">&lt;-</span> <span class="kw">function</span>() <span class="fn">cat</span>(<span class="st">"Hola!\n"</span>)
+
+<span class="cm"># ❌ Sin paréntesis: muestra el código de la función, no la ejecuta</span>
+saludar
+
+<span class="cm"># ✅ Con paréntesis: ejecuta la función</span>
+<span class="fn">saludar</span>()</pre>
+    <div class="out-wrap" id="o-err-1"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+
+  <h2>Error 2 — la función devuelve <code>NULL</code> sin querer</h2>
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">error_02.R</span><span class="cell-badge badge-exec">Ejecutable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="cm"># ❌ La última expresión es una asignación → devuelve NULL</span>
+<span class="fn">calcular</span> <span class="op">&lt;-</span> <span class="kw">function</span>(x) {
+  <span class="nm">resultado</span> <span class="op">&lt;-</span> x <span class="op">*</span> <span class="nm">2</span>   <span class="cm"># asignación: invisible, devuelve NULL</span>
+}
+<span class="fn">calcular</span>(<span class="nm">5</span>)   <span class="cm"># imprime NULL</span>
+
+<span class="cm"># ✅ Hay que exponer el valor final</span>
+<span class="fn">calcular2</span> <span class="op">&lt;-</span> <span class="kw">function</span>(x) {
+  <span class="nm">resultado</span> <span class="op">&lt;-</span> x <span class="op">*</span> <span class="nm">2</span>
+  resultado          <span class="cm"># esta línea devuelve el valor</span>
+}
+<span class="fn">calcular2</span>(<span class="nm">5</span>)</pre>
+    <div class="out-wrap" id="o-err-2"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+
+  <h2>Error 3 — confundir <code>cat()</code> con devolver un valor</h2>
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">error_03.R</span><span class="cell-badge badge-exec">Ejecutable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="cm"># ❌ cat() imprime pero devuelve NULL</span>
+<span class="fn">doble_malo</span> <span class="op">&lt;-</span> <span class="kw">function</span>(x) <span class="fn">cat</span>(x <span class="op">*</span> <span class="nm">2</span>)
+
+<span class="nm">res</span> <span class="op">&lt;-</span> <span class="fn">doble_malo</span>(<span class="nm">5</span>)
+<span class="fn">cat</span>(<span class="st">"\nres vale:"</span>, res, <span class="st">"\n"</span>)   <span class="cm"># res es NULL, no 10!</span>
+
+<span class="cm"># ✅ Devolver el valor; imprimir es tarea de quien llama</span>
+<span class="fn">doble_bien</span> <span class="op">&lt;-</span> <span class="kw">function</span>(x) x <span class="op">*</span> <span class="nm">2</span>
+
+<span class="nm">res2</span> <span class="op">&lt;-</span> <span class="fn">doble_bien</span>(<span class="nm">5</span>)
+<span class="fn">cat</span>(<span class="st">"res2 vale:"</span>, res2, <span class="st">"\n"</span>)</pre>
+    <div class="out-wrap" id="o-err-3"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+
+  <div class="callout err">
+    <div class="callout-title">Regla de oro</div>
+    <p>Una función debe <strong>devolver</strong> el resultado con la última expresión (o <code>return()</code>). <strong>Imprimir</strong> con <code>cat()</code> o <code>print()</code> dentro es solo para debug o funciones cuyo propósito es mostrar texto. No mezcles los dos roles.</p>
+  </div>
+</div>
+
+<!-- ══ 07 EJERCICIOS ══ -->
+<div class="page" id="p-ejercicios">
+  <div class="eyebrow">Sección 07</div>
+  <h1>Ejercicios</h1>
+  <p class="lead">Practica lo aprendido. Cada ejercicio tiene un bloque editable. Usa el botón de pista si te atascas y el de solución para comparar.</p>
+
+  <!-- EJ 1 -->
+  <h2>Ejercicio 1 — Clasificar número</h2>
+  <p>Escribe <code>clasificar(x)</code> que devuelva <code>"positivo"</code>, <code>"negativo"</code> o <code>"cero"</code> según el valor de <code>x</code>. Pruébala con varios valores.</p>
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">ej01.R</span><span class="cell-badge badge-exec">Editable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="fn">clasificar</span> <span class="op">&lt;-</span> <span class="kw">function</span>(x) {
+  <span class="cm"># tu código aquí</span>
+}
+
+<span class="fn">clasificar</span>(<span class="nm">5</span>)
+<span class="fn">clasificar</span>(<span class="nm">-3</span>)
+<span class="fn">clasificar</span>(<span class="nm">0</span>)</pre>
+    <div class="out-wrap" id="o-ej1"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+  <details style="margin:8px 0 20px">
+    <summary style="cursor:pointer;font-size:13px;color:var(--muted);user-select:none">▸ Ver solución</summary>
+    <div class="cell" style="margin-top:10px">
+      <div class="cell-head">
+        <div class="cell-meta"><span class="cell-filename">ej01_sol.R</span><span class="cell-badge badge-read">Solución</span></div>
+        <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+      </div>
+      <pre class="code-in" contenteditable="false" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="fn">clasificar</span> <span class="op">&lt;-</span> <span class="kw">function</span>(x) {
+  <span class="kw">if</span>      (x <span class="op">&gt;</span> <span class="nm">0</span>) <span class="st">"positivo"</span>
+  <span class="kw">else if</span> (x <span class="op">&lt;</span> <span class="nm">0</span>) <span class="st">"negativo"</span>
+  <span class="kw">else</span>            <span class="st">"cero"</span>
+}
+
+<span class="fn">clasificar</span>(<span class="nm">5</span>)
+<span class="fn">clasificar</span>(<span class="nm">-3</span>)
+<span class="fn">clasificar</span>(<span class="nm">0</span>)</pre>
+      <div class="out-wrap" id="o-ej1s"><div class="out-label">salida</div><div class="out-content"></div></div>
+    </div>
+  </details>
+
+  <!-- EJ 2 -->
+  <h2>Ejercicio 2 — Normalizar vector</h2>
+  <p>Escribe <code>normalizar(v)</code> que escale un vector numérico al rango [0, 1]. La fórmula es <code>(x - min) / (max - min)</code>. Comprueba que el resultado tiene mínimo 0 y máximo 1.</p>
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">ej02.R</span><span class="cell-badge badge-exec">Editable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="fn">normalizar</span> <span class="op">&lt;-</span> <span class="kw">function</span>(v) {
+  <span class="cm"># tu código aquí</span>
+}
+
+<span class="nm">datos</span> <span class="op">&lt;-</span> <span class="fn">c</span>(<span class="nm">10</span>, <span class="nm">20</span>, <span class="nm">30</span>, <span class="nm">40</span>, <span class="nm">50</span>)
+<span class="fn">normalizar</span>(datos)</pre>
+    <div class="out-wrap" id="o-ej2"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+  <details style="margin:8px 0 20px">
+    <summary style="cursor:pointer;font-size:13px;color:var(--muted);user-select:none">▸ Ver solución</summary>
+    <div class="cell" style="margin-top:10px">
+      <div class="cell-head">
+        <div class="cell-meta"><span class="cell-filename">ej02_sol.R</span><span class="cell-badge badge-read">Solución</span></div>
+        <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+      </div>
+      <pre class="code-in" contenteditable="false" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="fn">normalizar</span> <span class="op">&lt;-</span> <span class="kw">function</span>(v) {
+  (v <span class="op">-</span> <span class="fn">min</span>(v)) <span class="op">/</span> (<span class="fn">max</span>(v) <span class="op">-</span> <span class="fn">min</span>(v))
+}
+
+<span class="nm">datos</span> <span class="op">&lt;-</span> <span class="fn">c</span>(<span class="nm">10</span>, <span class="nm">20</span>, <span class="nm">30</span>, <span class="nm">40</span>, <span class="nm">50</span>)
+<span class="fn">normalizar</span>(datos)</pre>
+      <div class="out-wrap" id="o-ej2s"><div class="out-label">salida</div><div class="out-content"></div></div>
+    </div>
+  </details>
+
+  <!-- EJ 3 -->
+  <h2>Ejercicio 3 — Fábrica de potencias</h2>
+  <p>Crea <code>hacer_potencia(n)</code> que devuelva una función que eleva su argumento a la potencia <code>n</code>. Luego crea <code>al_cuadrado</code> y <code>al_cubo</code> con ella.</p>
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">ej03.R</span><span class="cell-badge badge-exec">Editable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="fn">hacer_potencia</span> <span class="op">&lt;-</span> <span class="kw">function</span>(n) {
+  <span class="cm"># tu código aquí</span>
+}
+
+<span class="nm">al_cuadrado</span> <span class="op">&lt;-</span> <span class="fn">hacer_potencia</span>(<span class="nm">2</span>)
+<span class="nm">al_cubo</span>     <span class="op">&lt;-</span> <span class="fn">hacer_potencia</span>(<span class="nm">3</span>)
+
+<span class="fn">al_cuadrado</span>(<span class="nm">4</span>)   <span class="cm"># 16</span>
+<span class="fn">al_cubo</span>(<span class="nm">3</span>)       <span class="cm"># 27</span></pre>
+    <div class="out-wrap" id="o-ej3"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+  <details style="margin:8px 0 20px">
+    <summary style="cursor:pointer;font-size:13px;color:var(--muted);user-select:none">▸ Ver solución</summary>
+    <div class="cell" style="margin-top:10px">
+      <div class="cell-head">
+        <div class="cell-meta"><span class="cell-filename">ej03_sol.R</span><span class="cell-badge badge-read">Solución</span></div>
+        <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+      </div>
+      <pre class="code-in" contenteditable="false" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="fn">hacer_potencia</span> <span class="op">&lt;-</span> <span class="kw">function</span>(n) {
+  <span class="kw">function</span>(x) x <span class="op">^</span> n
+}
+
+<span class="nm">al_cuadrado</span> <span class="op">&lt;-</span> <span class="fn">hacer_potencia</span>(<span class="nm">2</span>)
+<span class="nm">al_cubo</span>     <span class="op">&lt;-</span> <span class="fn">hacer_potencia</span>(<span class="nm">3</span>)
+
+<span class="fn">al_cuadrado</span>(<span class="nm">4</span>)   <span class="cm"># 16</span>
+<span class="fn">al_cubo</span>(<span class="nm">3</span>)       <span class="cm"># 27</span>
+<span class="fn">al_cuadrado</span>(<span class="fn">al_cubo</span>(<span class="nm">2</span>))  <span class="cm"># (2³)² = 64</span></pre>
+      <div class="out-wrap" id="o-ej3s"><div class="out-label">salida</div><div class="out-content"></div></div>
+    </div>
+  </details>
+</div>
+
+</main>
+
+<!-- WEBR STATUS BAR -->
+<div id="webr-bar">
+  <div class="webr-dot"></div>
+  <span id="webr-msg">Cargando R en el navegador…</span>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { WebR } from 'https://webr.r-wasm.org/v0.4.2/webr.mjs';
+
+/* ── NAVIGATION ── */
+const PAGES = ['intro','sintaxis','argumentos','retorno','funciones-como-objetos','errores','ejercicios'];
+const seen  = new Set(['intro']);
+
+function goTo(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('p-' + id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick') === `goTo('${id}')`) n.classList.add('active');
+  });
+  seen.add(id);
+  const pct = Math.round(seen.size / PAGES.length * 100);
+  document.getElementById('prog').style.width = pct + '%';
+  document.getElementById('pct').textContent = seen.size + ' / ' + PAGES.length;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ── WEBR ── */
+let webR, ready = false, queue = [];
+
+async function init() {
+  try {
+    webR = new WebR({ quiet: true });
+    await webR.init();
+    ready = true;
+    const bar = document.getElementById('webr-bar');
+    bar.classList.add('ready');
+    document.getElementById('webr-msg').textContent = 'R listo — puedes ejecutar los bloques';
+    setTimeout(() => bar.classList.add('hidden'), 3000);
+    for (const fn of queue) await fn();
+    queue = [];
+  } catch(e) {
+    document.getElementById('webr-msg').textContent = 'Error al cargar R: ' + e.message;
+  }
+}
+
+async function runCell(btn) {
+  const cell    = btn.closest('.cell');
+  const code    = cell.querySelector('.code-in').innerText.replace(/\u200B/g,'').trim();
+  const outWrap = cell.querySelector('.out-wrap');
+  const outEl   = outWrap.querySelector('.out-content');
+
+  btn.disabled = true; btn.textContent = '⏳';
+  outEl.className = 'out-content';
+  outEl.textContent = 'Ejecutando…';
+  outWrap.classList.add('show');
+
+  const exec = async () => {
+    try {
+      const sh  = await new webR.Shelter();
+      const res = await sh.captureR(code, { withAutoprint: true });
+      let out = '';
+      for (const m of res.output) if (m.type === 'stdout' || m.type === 'stderr') out += m.data + '\n';
+      const hasErr = res.output.some(m => m.type === 'stderr' && m.data.trim());
+      outEl.className = 'out-content' + (hasErr ? ' err' : '');
+      outEl.textContent = out.trimEnd() || '(sin salida)';
+      await sh.purge();
+    } catch(e) {
+      outEl.className = 'out-content err';
+      outEl.textContent = 'Error: ' + e.message;
+    }
+    btn.disabled = false; btn.innerHTML = '▶ Ejecutar';
+  };
+
+  ready ? await exec() : (queue.push(exec), document.getElementById('webr-bar').classList.remove('hidden'));
+}
+
+function copyCell(btn) {
+  const text = btn.closest('.cell').querySelector('.code-in').innerText.replace(/\u200B/g,'').trim();
+  navigator.clipboard.writeText(text).then(() => toast('Copiado ✓'));
+}
+
+/* ── QUIZ ── */
+const FB = {
+  'q-args': { ok: '✓ Correcto. Al usar nombres, el orden no importa. <code>base=3, exponente=2</code> → 3² = 9.', no: '✗ Cuando usas argumentos nombrados el orden es irrelevante. <code>base=3, exponente=2</code> calcula 3² = 9.' },
+  'q-ret':  { ok: '✓ Correcto. La última expresión evaluada es <code>x + y = 30</code>, y ese es el retorno implícito.', no: '✗ En R el retorno implícito es la última expresión <em>evaluada</em>. Una asignación evalúa en silencio; <code>x + y</code> es la última expresión visible, devuelve 30.' },
+};
+
+function quiz(id, el, correct) {
+  const wrap = document.getElementById(id);
+  if (wrap.dataset.done) return;
+  wrap.dataset.done = '1';
+  wrap.querySelectorAll('.quiz-opt').forEach(o => o.classList.add('locked'));
+  el.classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) wrap.querySelectorAll('.quiz-opt:not(.wrong)').forEach(o => o.style.opacity = '.4');
+  const fb = document.getElementById('qfb-' + id);
+  fb.className = 'quiz-fb show ' + (correct ? 'ok' : 'no');
+  fb.innerHTML = FB[id][correct ? 'ok' : 'no'];
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+/* ── EXPOSE & BOOT ── */
+window.goTo     = goTo;
+window.runCell  = runCell;
+window.copyCell = copyCell;
+window.quiz     = quiz;
+
+init();
+</script>
+</body>
+</html>

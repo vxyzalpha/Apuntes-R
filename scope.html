@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alcance de Variables en R — Apuntes Interactivos</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #faf9f6;
+  --bg2:      #f2f0eb;
+  --surface:  #ffffff;
+  --border:   #e2ddd6;
+  --text:     #1a1714;
+  --muted:    #6b6560;
+  --accent:   #c0392b;
+  --accent-soft: #fdf0ee;
+  --code-bg:  #1e1e2e;
+  --code-text:#cdd6f4;
+  --green:    #166534;
+  --green-bg: #f0fdf4;
+  --yellow:   #92400e;
+  --yellow-bg:#fffbeb;
+  --red:      #991b1b;
+  --red-bg:   #fef2f2;
+  --blue:     #1e40af;
+  --blue-bg:  #eff6ff;
+  --sidebar-w:256px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);font-size:16px;line-height:1.75;display:flex;min-height:100vh}
+
+/* ── SIDEBAR ── */
+#sidebar{width:var(--sidebar-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);position:fixed;top:0;left:0;display:flex;flex-direction:column;overflow-y:auto;z-index:100}
+.sb-head{padding:28px 24px 22px;border-bottom:1px solid var(--border)}
+.sb-logo{font-family:'DM Serif Display',serif;font-size:19px;color:var(--text);line-height:1.25}
+.sb-logo span{color:var(--accent)}
+.sb-sub{font-size:10.5px;color:var(--muted);letter-spacing:.09em;text-transform:uppercase;margin-top:5px}
+.sb-other{margin:18px 20px 0;padding:12px 14px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)}
+.sb-other-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.sb-other a{display:block;font-size:12.5px;color:var(--accent);text-decoration:none;padding:3px 0}
+.sb-other a:hover{text-decoration:underline}
+.nav-group{padding:16px 0 6px 24px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 24px;font-size:13.5px;color:var(--muted);cursor:pointer;border-left:2px solid transparent;transition:all .15s;text-decoration:none;user-select:none}
+.nav-item:hover{color:var(--text);background:var(--bg)}
+.nav-item.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-soft);font-weight:500}
+.nav-dot{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.45;flex-shrink:0}
+.nav-item.active .nav-dot{opacity:1}
+.sb-footer{margin-top:auto;padding:20px 24px;border-top:1px solid var(--border)}
+.sb-prog-label{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:7px}
+.sb-prog-track{height:3px;background:var(--bg2);border-radius:2px}
+.sb-prog-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s ease;width:0%}
+
+/* ── MAIN ── */
+#main{margin-left:var(--sidebar-w);flex:1}
+.page{display:none;max-width:800px;margin:0 auto;padding:64px 60px 100px;animation:fadeIn .25s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── TYPOGRAPHY ── */
+.eyebrow{font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+h1{font-family:'DM Serif Display',serif;font-size:42px;line-height:1.08;color:var(--text);margin-bottom:18px}
+h2{font-family:'DM Serif Display',serif;font-size:26px;color:var(--text);margin:52px 0 16px;padding-top:40px;border-top:1px solid var(--border)}
+h2:first-of-type{border-top:none;margin-top:28px;padding-top:0}
+h3{font-size:16px;font-weight:600;color:var(--text);margin:28px 0 10px}
+p{margin-bottom:14px;color:#2c2820}
+.lead{font-size:17.5px;color:var(--muted);line-height:1.65;margin-bottom:36px}
+ul,ol{padding-left:22px;margin-bottom:14px}
+li{margin-bottom:6px;font-size:15.5px}
+p code,li code,h3 code,td code{font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--bg2);border:1px solid var(--border);padding:2px 6px;border-radius:4px;color:var(--accent)}
+strong{font-weight:600}
+hr{border:none;border-top:1px solid var(--border);margin:36px 0}
+
+/* ── CALLOUTS ── */
+.callout{border-left:3px solid;padding:14px 18px;margin:20px 0;border-radius:0 8px 8px 0;font-size:15px}
+.callout-title{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px}
+.callout p{margin:0;color:inherit}
+.callout.key  {border-color:var(--accent);background:var(--accent-soft)}.callout.key  .callout-title{color:var(--accent)}
+.callout.tip  {border-color:var(--green); background:var(--green-bg)} .callout.tip  .callout-title{color:var(--green)}
+.callout.warn {border-color:var(--yellow);background:var(--yellow-bg)}.callout.warn .callout-title{color:var(--yellow)}
+.callout.note {border-color:var(--blue);  background:var(--blue-bg)} .callout.note .callout-title{color:var(--blue)}
+.callout.err  {border-color:var(--red);   background:var(--red-bg)}  .callout.err  .callout-title{color:var(--red)}
+
+/* ── CODE CELL ── */
+.cell{margin:24px 0;border-radius:10px;overflow:hidden;border:1px solid #2a2a3e;box-shadow:0 2px 12px rgba(0,0,0,.1)}
+.cell-head{background:#252235;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.cell-meta{display:flex;align-items:center;gap:8px}
+.cell-filename{font-family:'JetBrains Mono',monospace;font-size:11px;color:#6c6f8a;letter-spacing:.04em}
+.cell-badge{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:3px}
+.badge-exec{background:#1e3a2e;color:#4ade80}
+.badge-read{background:#2e2418;color:#fb923c}
+.cell-actions{display:flex;gap:7px;align-items:center}
+.btn-run{display:flex;align-items:center;gap:5px;background:var(--accent);color:#fff;border:none;padding:5px 13px;border-radius:5px;font-family:'Outfit',sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;cursor:pointer;transition:opacity .15s,transform .1s}
+.btn-run:hover{opacity:.85}.btn-run:active{transform:scale(.97)}.btn-run:disabled{opacity:.4;cursor:not-allowed}
+.btn-copy{background:transparent;color:#6c6f8a;border:1px solid #3a3a50;padding:4px 11px;border-radius:5px;font-family:'Outfit',sans-serif;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s}
+.btn-copy:hover{color:#cdd6f4;border-color:#6c6f8a}
+pre.code-in{background:var(--code-bg);padding:18px 20px;margin:0;font-family:'JetBrains Mono',monospace;font-size:13.5px;line-height:1.7;overflow-x:auto;outline:none;caret-color:#fff;color:var(--code-text);white-space:pre;tab-size:2;min-height:52px}
+pre.code-in[contenteditable="true"]:focus{box-shadow:inset 0 0 0 2px rgba(192,57,43,.35)}
+.out-wrap{background:#13131f;border-top:1px solid #2a2a3e;display:none}
+.out-wrap.show{display:block}
+.out-label{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#3a3a50;padding:7px 20px 3px;letter-spacing:.1em;text-transform:uppercase}
+.out-content{padding:2px 20px 14px;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.7;color:#a6adc8;white-space:pre-wrap;word-break:break-word}
+.out-content.err{color:#f38ba8}
+
+/* ── WEBR STATUS ── */
+#webr-bar{position:fixed;bottom:0;left:var(--sidebar-w);right:0;background:#1e1e2e;border-top:1px solid #2a2a3e;padding:10px 24px;display:flex;align-items:center;gap:10px;font-size:12px;color:#6c6f8a;font-family:'Outfit',sans-serif;z-index:200;transition:opacity .3s}
+#webr-bar.hidden{opacity:0;pointer-events:none}
+.webr-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0;animation:blink 1.2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+#webr-bar.ready .webr-dot{background:#4ade80;animation:none}
+
+/* ── SYNTAX ── */
+.kw{color:#cba6f7}.fn{color:#89b4fa}.st{color:#a6e3a1}.nm{color:#fab387}.cm{color:#45475a;font-style:italic}.op{color:#cdd6f4}.sp{color:#f38ba8}
+
+/* ── TABLES ── */
+.tbl{width:100%;border-collapse:collapse;margin:18px 0;font-size:14.5px}
+.tbl th{background:var(--text);color:var(--bg);font-weight:600;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;padding:10px 14px;text-align:left}
+.tbl td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:top}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--bg2)}
+.tbl td:first-child{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--accent);white-space:nowrap}
+
+/* ── ENV DIAGRAM ── */
+.env-stack{margin:22px 0;display:flex;flex-direction:column;gap:0;border-radius:10px;overflow:hidden;border:1px solid var(--border)}
+.env-layer{padding:14px 20px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--border)}
+.env-layer:last-child{border-bottom:none}
+.env-icon{width:34px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.env-name{font-size:13.5px;font-weight:600;margin-bottom:2px}
+.env-desc{font-size:12.5px;color:var(--muted)}
+.env-code{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--bg2);border:1px solid var(--border);padding:3px 8px;border-radius:4px;color:var(--accent);white-space:nowrap;flex-shrink:0}
+.env-global {background:#f0fdf4}.env-global  .env-icon{background:#dcfce7;color:#166534}
+.env-func   {background:#eff6ff}.env-func    .env-icon{background:#dbeafe;color:#1e40af}
+.env-nested {background:#fdf4ff}.env-nested  .env-icon{background:#f3e8ff;color:#7e22ce}
+.env-pkg    {background:var(--bg2)}.env-pkg  .env-icon{background:var(--border);color:var(--muted)}
+
+/* ── LOOKUP CHAIN ── */
+.lookup-chain{margin:20px 0;display:flex;flex-direction:column;border-radius:10px;overflow:hidden;border:1px solid var(--border)}
+.lc-row{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid var(--border);background:var(--surface)}
+.lc-row:last-child{border-bottom:none}
+.lc-n{font-family:'DM Serif Display',serif;font-size:22px;color:var(--border);width:26px;flex-shrink:0}
+.lc-text{flex:1;font-size:14.5px}
+.lc-text strong{display:block;font-size:13.5px;margin-bottom:1px}
+.lc-tag{font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--bg2);border:1px solid var(--border);padding:3px 8px;border-radius:4px;color:var(--muted);flex-shrink:0}
+.lc-row.found{background:var(--green-bg)}.lc-row.found .lc-n{color:var(--green)}
+.lc-row.fail{background:var(--red-bg)}.lc-row.fail .lc-n{color:var(--red)}
+
+/* ── QUIZ ── */
+.quiz{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:22px;margin:24px 0}
+.quiz-q{font-weight:600;font-size:15px;margin-bottom:16px;line-height:1.5}
+.quiz-opts{display:flex;flex-direction:column;gap:7px}
+.quiz-opt{display:flex;align-items:flex-start;gap:11px;padding:11px 15px;background:var(--bg);border:1.5px solid var(--border);border-radius:7px;cursor:pointer;font-size:14.5px;transition:border-color .15s,background .15s;user-select:none}
+.quiz-opt:hover:not(.locked){border-color:#b0a898;background:#f0ece4}
+.opt-l{font-size:11px;font-weight:700;color:var(--muted);width:20px;flex-shrink:0;padding-top:2px}
+.quiz-opt.correct{border-color:var(--green);background:var(--green-bg)}.quiz-opt.correct .opt-l{color:var(--green)}
+.quiz-opt.wrong{border-color:var(--red);background:var(--red-bg);opacity:.6}
+.quiz-fb{font-size:13.5px;padding:11px 14px;border-radius:7px;margin-top:12px;display:none;line-height:1.5}
+.quiz-fb.show{display:block}.quiz-fb.ok{background:var(--green-bg);color:var(--green);border:1px solid #bbf7d0}.quiz-fb.no{background:var(--red-bg);color:var(--red);border:1px solid #fecaca}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:60px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--text);color:var(--bg);font-size:12px;font-weight:500;padding:8px 18px;border-radius:6px;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── MOBILE ── */
+@media(max-width:768px){:root{--sidebar-w:0px}#sidebar{display:none}#main{margin-left:0}.page{padding:32px 22px 80px}h1{font-size:30px}}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sb-head">
+    <div class="sb-logo">Alcance de<br><span>Variables</span></div>
+    <div class="sb-sub">Apuntes interactivos</div>
+  </div>
+  <div class="sb-other">
+    <div class="sb-other-label">También disponible</div>
+    <a href="funciones.html">→ Funciones en R</a>
+  </div>
+
+  <div class="nav-group">Fundamentos</div>
+  <a class="nav-item active" onclick="goTo('intro')"><span class="nav-dot"></span>¿Qué es el scope?</a>
+  <a class="nav-item" onclick="goTo('entornos')"><span class="nav-dot"></span>Entornos</a>
+  <a class="nav-item" onclick="goTo('lexical')"><span class="nav-dot"></span>Scoping léxico</a>
+  <a class="nav-item" onclick="goTo('busqueda')"><span class="nav-dot"></span>Búsqueda de variables</a>
+
+  <div class="nav-group">En profundidad</div>
+  <a class="nav-item" onclick="goTo('superassign')"><span class="nav-dot"></span>El operador &lt;&lt;-</a>
+  <a class="nav-item" onclick="goTo('closures')"><span class="nav-dot"></span>Closures</a>
+  <a class="nav-item" onclick="goTo('errores')"><span class="nav-dot"></span>Errores frecuentes</a>
+
+  <div class="nav-group">Práctica</div>
+  <a class="nav-item" onclick="goTo('ejercicios')"><span class="nav-dot"></span>Ejercicios</a>
+
+  <div class="sb-footer">
+    <div class="sb-prog-label"><span>Progreso</span><span id="pct">0 / 8</span></div>
+    <div class="sb-prog-track"><div class="sb-prog-fill" id="prog"></div></div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main id="main">
+
+<!-- ══ 01 INTRO ══ -->
+<div class="page active" id="p-intro">
+  <div class="eyebrow">Sección 01</div>
+  <h1>¿Qué es el scope?</h1>
+  <p class="lead">El <em>scope</em> o alcance define desde dónde es visible y accesible una variable. Entenderlo es la diferencia entre código que funciona y código que falla misteriosamente.</p>
+
+  <div class="callout key">
+    <div class="callout-title">Idea central</div>
+    <p>En R, cada llamada a una función crea su propio espacio de variables. Las variables que creas dentro de una función <strong>no existen fuera</strong> de ella, y las de fuera son visibles dentro… salvo que la función tenga la suya propia con el mismo nombre.</p>
+  </div>
+
+  <h2>El problema que resuelve</h2>
+  <p>Sin scope, todos los programas compartirían las mismas variables. Cualquier función podría modificar accidentalmente datos de otra. El scope es el mecanismo que evita esas colisiones.</p>
+
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">intro_01.R</span><span class="cell-badge badge-exec">Ejecutable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())  <span class="cm"># limpia el workspace</span>
+
+<span class="nm">x</span> <span class="op">&lt;-</span> <span class="nm">100</span>         <span class="cm"># x en el entorno GLOBAL</span>
+
+<span class="fn">f</span> <span class="op">&lt;-</span> <span class="kw">function</span>() {
+  <span class="nm">x</span> <span class="op">&lt;-</span> <span class="nm">42</span>         <span class="cm"># x LOCAL: solo existe dentro de f()</span>
+  <span class="fn">cat</span>(<span class="st">"Dentro de f, x ="</span>, x, <span class="st">"\n"</span>)
+}
+
+<span class="fn">f</span>()
+<span class="fn">cat</span>(<span class="st">"Fuera de f,   x ="</span>, x, <span class="st">"\n"</span>)  <span class="cm"># sigue siendo 100</span></pre>
+    <div class="out-wrap" id="o-intro-1"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+
+  <p>Observa que la <code>x</code> local de <code>f()</code> y la <code>x</code> global son completamente independientes. Modificar una no afecta a la otra.</p>
+
+  <h2>¿Por qué es importante aprenderlo?</h2>
+  <ul>
+    <li>Evitar <strong>bugs silenciosos</strong> donde una variable cambia sin que lo esperes.</li>
+    <li>Entender por qué R dice <em>"object not found"</em> en ciertas situaciones.</li>
+    <li>Usar <strong>closures</strong> correctamente.</li>
+    <li>Saber cuándo usar <code>&lt;&lt;-</code> y cuándo <code>&lt;-</code>.</li>
+  </ul>
+
+  <div class="callout tip">
+    <div class="callout-title">Nota sobre rm(list = ls())</div>
+    <p>Todos los bloques de código de estas páginas empiezan con <code>rm(list = ls())</code>. Esto limpia el workspace antes de cada ejemplo para que los conceptos se vean con claridad, sin interferencias de variables de bloques anteriores.</p>
+  </div>
+</div>
+
+<!-- ══ 02 ENTORNOS ══ -->
+<div class="page" id="p-entornos">
+  <div class="eyebrow">Sección 02</div>
+  <h1>Entornos</h1>
+  <p class="lead">Un entorno es el contenedor donde R guarda variables. Cada función crea uno nuevo al ejecutarse. Los entornos se organizan en cadena, cada uno apuntando a su padre.</p>
+
+  <h2>La jerarquía de entornos</h2>
+
+  <div class="env-stack">
+    <div class="env-layer env-pkg">
+      <div class="env-icon">📦</div>
+      <div><div class="env-name">Paquetes cargados</div><div class="env-desc">mean, sum, paste, library…</div></div>
+      <span class="env-code">search()</span>
+    </div>
+    <div class="env-layer env-global">
+      <div class="env-icon">🌍</div>
+      <div><div class="env-name">Entorno global (.GlobalEnv)</div><div class="env-desc">Variables que creas en la consola o scripts</div></div>
+      <span class="env-code">globalenv()</span>
+    </div>
+    <div class="env-layer env-func">
+      <div class="env-icon">⚙️</div>
+      <div><div class="env-name">Entorno de función</div><div class="env-desc">Creado en cada llamada; destruido al terminar</div></div>
+      <span class="env-code">environment()</span>
+    </div>
+    <div class="env-layer env-nested">
+      <div class="env-icon">🔹</div>
+      <div><div class="env-name">Entorno de función anidada</div><div class="env-desc">Hijo del entorno de la función exterior</div></div>
+      <span class="env-code">parent.env()</span>
+    </div>
+  </div>
+
+  <h2>Inspeccionar entornos en R</h2>
+
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">entornos_01.R</span><span class="cell-badge badge-exec">Ejecutable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="cm"># Nombre del entorno actual</span>
+<span class="fn">environmentName</span>(<span class="fn">globalenv</span>())   <span class="cm"># "R_GlobalEnv"</span>
+<span class="fn">environmentName</span>(<span class="fn">baseenv</span>())     <span class="cm"># "base"</span>
+
+<span class="cm"># Variables en el entorno global</span>
+<span class="nm">a</span> <span class="op">&lt;-</span> <span class="nm">1</span>;  <span class="nm">b</span> <span class="op">&lt;-</span> <span class="st">"hola"</span>;  <span class="nm">c</span> <span class="op">&lt;-</span> <span class="kw">TRUE</span>
+<span class="fn">ls</span>()
+
+<span class="cm"># Ver entorno dentro de una función</span>
+<span class="fn">ver_env</span> <span class="op">&lt;-</span> <span class="kw">function</span>() {
+  <span class="fn">cat</span>(<span class="st">"Entorno local:"</span>, <span class="fn">environmentName</span>(<span class="fn">environment</span>()), <span class="st">"\n"</span>)
+  <span class="fn">cat</span>(<span class="st">"Su padre:     "</span>, <span class="fn">environmentName</span>(<span class="fn">parent.env</span>(<span class="fn">environment</span>())), <span class="st">"\n"</span>)
+}
+<span class="fn">ver_env</span>()</pre>
+    <div class="out-wrap" id="o-env-1"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">entornos_02.R</span><span class="cell-badge badge-exec">Ejecutable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="cm"># Crear un entorno manualmente</span>
+<span class="nm">e</span> <span class="op">&lt;-</span> <span class="fn">new.env</span>(parent <span class="op">=</span> <span class="fn">emptyenv</span>())
+<span class="nm">e</span>$<span class="nm">x</span> <span class="op">&lt;-</span> <span class="nm">99</span>
+<span class="nm">e</span>$<span class="nm">y</span> <span class="op">&lt;-</span> <span class="st">"prueba"</span>
+
+<span class="fn">ls</span>(e)                        <span class="cm"># variables en e</span>
+<span class="fn">get</span>(<span class="st">"x"</span>, envir <span class="op">=</span> e)          <span class="cm"># obtener valor</span>
+<span class="fn">exists</span>(<span class="st">"z"</span>, envir <span class="op">=</span> e)       <span class="cm"># FALSE: z no existe</span></pre>
+    <div class="out-wrap" id="o-env-2"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+
+  <table class="tbl">
+    <thead><tr><th>Función</th><th>Qué hace</th></tr></thead>
+    <tbody>
+      <tr><td>environment()</td><td>Entorno actual (o de una función dada)</td></tr>
+      <tr><td>parent.env(e)</td><td>Entorno padre de e</td></tr>
+      <tr><td>globalenv()</td><td>El entorno global</td></tr>
+      <tr><td>baseenv()</td><td>El entorno del paquete base</td></tr>
+      <tr><td>emptyenv()</td><td>Entorno vacío (raíz de la cadena)</td></tr>
+      <tr><td>new.env(parent=)</td><td>Crear un entorno nuevo</td></tr>
+      <tr><td>ls(envir=e)</td><td>Listar variables de un entorno</td></tr>
+      <tr><td>get("x", envir=e)</td><td>Obtener el valor de "x" en e</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══ 03 SCOPING LÉXICO ══ -->
+<div class="page" id="p-lexical">
+  <div class="eyebrow">Sección 03</div>
+  <h1>Scoping léxico</h1>
+  <p class="lead">R usa <em>lexical scoping</em>: una función busca sus variables en el entorno donde fue <strong>definida</strong>, no en el entorno desde el que se la llama.</p>
+
+  <div class="callout key">
+    <div class="callout-title">Regla de oro</div>
+    <p>Cuando R necesita el valor de una variable libre (no es argumento ni local), la busca en el entorno de <strong>definición</strong> de la función, no en el entorno de <strong>llamada</strong>.</p>
+  </div>
+
+  <h2>Variable libre vs. local</h2>
+  <p>Una <strong>variable libre</strong> es aquella que se usa dentro de una función pero no está declarada localmente (ni como argumento ni con <code>&lt;-</code> en el cuerpo).</p>
+
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">lexical_01.R</span><span class="cell-badge badge-exec">Ejecutable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="nm">x</span> <span class="op">&lt;-</span> <span class="st">"GLOBAL"</span>
+
+<span class="fn">f</span> <span class="op">&lt;-</span> <span class="kw">function</span>() {
+  <span class="fn">cat</span>(<span class="st">"f ve x ="</span>, x, <span class="st">"\n"</span>)  <span class="cm"># x es libre: busca donde f fue DEFINIDA</span>
+}
+
+<span class="fn">g</span> <span class="op">&lt;-</span> <span class="kw">function</span>() {
+  <span class="nm">x</span> <span class="op">&lt;-</span> <span class="st">"LOCAL de g"</span>
+  <span class="fn">f</span>()   <span class="cm"># f se llama desde g, pero f NO ve la x de g</span>
+}
+
+<span class="fn">f</span>()   <span class="cm"># busca x en global → "GLOBAL"</span>
+<span class="fn">g</span>()   <span class="cm"># f sigue viendo la x global, no la de g</span></pre>
+    <div class="out-wrap" id="o-lex-1"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+
+  <div class="callout note">
+    <div class="callout-title">Léxico vs. dinámico</div>
+    <p>Si R usara <em>dynamic scoping</em> (como bash), <code>f()</code> dentro de <code>g()</code> vería <code>"LOCAL de g"</code>. Pero R es léxico: el entorno que importa es donde se <em>escribió</em> la función.</p>
+  </div>
+
+  <h2>¿Cuándo se resuelve la variable libre?</h2>
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">lexical_02.R</span><span class="cell-badge badge-exec">Ejecutable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="cm"># La variable libre se busca en TIEMPO DE EJECUCIÓN,</span>
+<span class="cm"># pero en el entorno de DEFINICIÓN.</span>
+
+<span class="nm">base_val</span> <span class="op">&lt;-</span> <span class="nm">10</span>
+
+<span class="fn">sumar_base</span> <span class="op">&lt;-</span> <span class="kw">function</span>(n) n <span class="op">+</span> base_val  <span class="cm"># base_val es libre</span>
+
+<span class="fn">sumar_base</span>(<span class="nm">5</span>)    <span class="cm"># 15: base_val = 10</span>
+
+<span class="nm">base_val</span> <span class="op">&lt;-</span> <span class="nm">100</span>   <span class="cm"># cambiamos la variable global</span>
+
+<span class="fn">sumar_base</span>(<span class="nm">5</span>)    <span class="cm"># 105: ahora base_val = 100</span></pre>
+    <div class="out-wrap" id="o-lex-2"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+
+  <div class="callout warn">
+    <div class="callout-title">Cuidado</div>
+    <p>El comportamiento de <code>sumar_base()</code> cambia según el valor de <code>base_val</code> en el momento de la llamada. Las funciones con variables libres son menos predecibles. Cuando puedas, pasa todos los datos como argumentos.</p>
+  </div>
+
+  <div class="quiz" id="q-lex">
+    <div class="quiz-q">¿Qué imprime <code>g()</code> en este código?<br><code style="font-size:13px">x &lt;- 1; f &lt;- function() x; g &lt;- function() { x &lt;- 2; f() }; g()</code></div>
+    <div class="quiz-opts">
+      <div class="quiz-opt" onclick="quiz('q-lex',this,false)"><span class="opt-l">A</span>2 — porque g tiene x = 2 y llama a f()</div>
+      <div class="quiz-opt" onclick="quiz('q-lex',this,true)"> <span class="opt-l">B</span>1 — f fue definida en el global donde x = 1 (scoping léxico)</div>
+      <div class="quiz-opt" onclick="quiz('q-lex',this,false)"><span class="opt-l">C</span>Error — x no está definida dentro de f()</div>
+    </div>
+    <div class="quiz-fb" id="qfb-q-lex"></div>
+  </div>
+</div>
+
+<!-- ══ 04 BÚSQUEDA ══ -->
+<div class="page" id="p-busqueda">
+  <div class="eyebrow">Sección 04</div>
+  <h1>Búsqueda de variables</h1>
+  <p class="lead">Cuando R necesita el valor de un nombre, sigue una cadena de búsqueda ordenada y predecible. Conocerla te permite anticipar qué valor verá R en cualquier situación.</p>
+
+  <h2>La cadena de búsqueda</h2>
+
+  <div class="lookup-chain">
+    <div class="lc-row"><span class="lc-n">1</span><div class="lc-text"><strong>Entorno local</strong>de la función en ejecución</div><span class="lc-tag">environment()</span></div>
+    <div class="lc-row"><span class="lc-n">2</span><div class="lc-text"><strong>Entornos padre</strong>sucesivamente hacia arriba</div><span class="lc-tag">parent.env()</span></div>
+    <div class="lc-row"><span class="lc-n">3</span><div class="lc-text"><strong>Entorno global</strong>.GlobalEnv</div><span class="lc-tag">globalenv()</span></div>
+    <div class="lc-row"><span class="lc-n">4</span><div class="lc-text"><strong>Paquetes cargados</strong>en orden de search()</div><span class="lc-tag">search()</span></div>
+    <div class="lc-row"><span class="lc-n">5</span><div class="lc-text"><strong>Paquete base</strong></div><span class="lc-tag">baseenv()</span></div>
+    <div class="lc-row fail"><span class="lc-n">✗</span><div class="lc-text"><strong>Error</strong>— "object 'x' not found"</div><span class="lc-tag">stop()</span></div>
+  </div>
+
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">busqueda_01.R</span><span class="cell-badge badge-exec">Ejecutable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="cm"># Ver la cadena de búsqueda completa</span>
+<span class="fn">search</span>()
+
+<span class="cm"># ¿Dónde vive la función 'mean'?</span>
+<span class="fn">find</span>(<span class="st">"mean"</span>)
+
+<span class="cm"># Variable que no existe → error capturado</span>
+<span class="fn">tryCatch</span>(
+  <span class="fn">cat</span>(variable_inexistente),
+  error <span class="op">=</span> <span class="kw">function</span>(e) <span class="fn">cat</span>(<span class="st">"❌"</span>, e$message, <span class="st">"\n"</span>)
+)</pre>
+    <div class="out-wrap" id="o-bus-1"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+
+  <h2>Enmascaramiento (shadowing)</h2>
+  <p>Una variable local con el mismo nombre que una de un entorno padre la <strong>enmascara</strong>: R encuentra la local primero y nunca llega a buscar más arriba.</p>
+
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">busqueda_02.R</span><span class="cell-badge badge-exec">Ejecutable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="nm">valor</span> <span class="op">&lt;-</span> <span class="st">"soy global"</span>
+
+<span class="fn">externa</span> <span class="op">&lt;-</span> <span class="kw">function</span>() {
+  <span class="nm">valor</span> <span class="op">&lt;-</span> <span class="st">"soy de externa"</span>   <span class="cm"># enmascara la global</span>
+
+  <span class="fn">interna</span> <span class="op">&lt;-</span> <span class="kw">function</span>() {
+    <span class="nm">valor</span> <span class="op">&lt;-</span> <span class="st">"soy de interna"</span>  <span class="cm"># enmascara la de externa</span>
+    <span class="fn">cat</span>(<span class="st">"interna ve:"</span>, valor, <span class="st">"\n"</span>)
+  }
+
+  <span class="fn">interna</span>()
+  <span class="fn">cat</span>(<span class="st">"externa ve:"</span>, valor, <span class="st">"\n"</span>)
+}
+
+<span class="fn">externa</span>()
+<span class="fn">cat</span>(<span class="st">"global  ve:"</span>, valor, <span class="st">"\n"</span>)</pre>
+    <div class="out-wrap" id="o-bus-2"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+
+  <div class="callout tip">
+    <div class="callout-title">Buena práctica</div>
+    <p>Evita usar el mismo nombre de variable en distintos niveles de scope. Aunque R lo permite, hace el código difícil de razonar. Si necesitas el valor del nivel superior, pásalo como argumento.</p>
+  </div>
+</div>
+
+<!-- ══ 05 SUPERASSIGN ══ -->
+<div class="page" id="p-superassign">
+  <div class="eyebrow">Sección 05</div>
+  <h1>El operador &lt;&lt;-</h1>
+  <p class="lead"><code>&lt;&lt;-</code> asigna en el primer entorno padre donde la variable ya exista. Si no la encuentra en ningún padre, la crea en el global. Es poderoso, pero debe usarse con criterio.</p>
+
+  <table class="tbl">
+    <thead><tr><th>Operador</th><th>Dónde asigna</th><th>Cuándo usar</th></tr></thead>
+    <tbody>
+      <tr><td>&lt;-</td><td>Siempre en el entorno <strong>local</strong> actual</td><td>Siempre por defecto</td></tr>
+      <tr><td>&lt;&lt;-</td><td>Busca hacia arriba; asigna donde encuentre la variable (o en global si no existe)</td><td>Closures con estado mutable</td></tr>
+    </tbody>
+  </table>
+
+  <h2>El bug clásico con <code>&lt;-</code></h2>
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">super_01.R</span><span class="cell-badge badge-exec">Ejecutable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="nm">total</span> <span class="op">&lt;-</span> <span class="nm">0</span>
+
+<span class="cm"># ❌ &lt;- crea una variable LOCAL: el global no cambia</span>
+<span class="fn">acumular_mal</span> <span class="op">&lt;-</span> <span class="kw">function</span>(x) {
+  <span class="nm">total</span> <span class="op">&lt;-</span> <span class="nm">total</span> <span class="op">+</span> x  <span class="cm"># local, no modifica el global</span>
+}
+
+<span class="fn">acumular_mal</span>(<span class="nm">10</span>); <span class="fn">acumular_mal</span>(<span class="nm">20</span>)
+<span class="fn">cat</span>(<span class="st">"total (mal):"</span>, total, <span class="st">"\n"</span>)   <span class="cm"># sigue siendo 0 !</span>
+
+<span class="cm"># ✅ &lt;&lt;- sube al entorno padre y modifica la variable allí</span>
+<span class="fn">acumular_bien</span> <span class="op">&lt;-</span> <span class="kw">function</span>(x) {
+  <span class="nm">total</span> <span class="sp">&lt;&lt;-</span> <span class="nm">total</span> <span class="op">+</span> x
+}
+
+<span class="fn">acumular_bien</span>(<span class="nm">10</span>); <span class="fn">acumular_bien</span>(<span class="nm">20</span>)
+<span class="fn">cat</span>(<span class="st">"total (bien):"</span>, total, <span class="st">"\n"</span>)  <span class="cm"># 30</span></pre>
+    <div class="out-wrap" id="o-sup-1"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+
+  <h2><code>&lt;&lt;-</code> en funciones anidadas</h2>
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">super_02.R</span><span class="cell-badge badge-exec">Ejecutable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="cm"># &lt;&lt;- sube solo hasta donde encuentra la variable</span>
+<span class="cm"># NO necesariamente llega al global</span>
+
+<span class="fn">externa</span> <span class="op">&lt;-</span> <span class="kw">function</span>() {
+  <span class="nm">x</span> <span class="op">&lt;-</span> <span class="st">"soy de externa"</span>
+
+  <span class="fn">interna</span> <span class="op">&lt;-</span> <span class="kw">function</span>() {
+    <span class="nm">x</span> <span class="sp">&lt;&lt;-</span> <span class="st">"modificada por interna"</span>
+    <span class="cm"># sube un nivel: encuentra x en 'externa', la modifica allí</span>
+  }
+
+  <span class="fn">interna</span>()
+  <span class="fn">cat</span>(<span class="st">"x en externa:"</span>, x, <span class="st">"\n"</span>)
+}
+
+<span class="fn">externa</span>()
+<span class="fn">cat</span>(<span class="st">"x existe en global?:"</span>, <span class="fn">exists</span>(<span class="st">"x"</span>), <span class="st">"\n"</span>)  <span class="cm"># FALSE</span></pre>
+    <div class="out-wrap" id="o-sup-2"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+
+  <div class="callout warn">
+    <div class="callout-title">Cuándo evitar &lt;&lt;-</div>
+    <p>Usar <code>&lt;&lt;-</code> introduce estado mutable global, lo que dificulta razonar sobre el código y puede causar bugs difíciles de reproducir. La alternativa más limpia casi siempre es <strong>devolver el valor</strong> con <code>return()</code> y reasignarlo desde fuera.</p>
+  </div>
+
+  <div class="quiz" id="q-sup">
+    <div class="quiz-q"><code>x &lt;- 5; f &lt;- function() { x &lt;&lt;- x * 2 }; f(); cat(x)</code> ¿qué imprime?</div>
+    <div class="quiz-opts">
+      <div class="quiz-opt" onclick="quiz('q-sup',this,false)"><span class="opt-l">A</span>5 — &lt;&lt;- no funciona dentro de funciones</div>
+      <div class="quiz-opt" onclick="quiz('q-sup',this,true)"> <span class="opt-l">B</span>10 — &lt;&lt;- modifica la x del global</div>
+      <div class="quiz-opt" onclick="quiz('q-sup',this,false)"><span class="opt-l">C</span>Error — x no está definida en f()</div>
+    </div>
+    <div class="quiz-fb" id="qfb-q-sup"></div>
+  </div>
+</div>
+
+<!-- ══ 06 CLOSURES ══ -->
+<div class="page" id="p-closures">
+  <div class="eyebrow">Sección 06</div>
+  <h1>Closures</h1>
+  <p class="lead">Un closure es una función que recuerda el entorno en el que fue creada. En R, <strong>todas las funciones son closures</strong>.</p>
+
+  <div class="callout key">
+    <div class="callout-title">Definición</div>
+    <p>Toda función en R lleva una referencia al entorno donde fue definida. Cuando ese entorno contiene datos que la función usa, decimos que la función <em>cierra sobre</em> (closes over) esos datos. De ahí el nombre <em>closure</em>.</p>
+  </div>
+
+  <h2>Fábrica de funciones</h2>
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">closure_01.R</span><span class="cell-badge badge-exec">Ejecutable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="fn">multiplicador</span> <span class="op">&lt;-</span> <span class="kw">function</span>(factor) {
+  <span class="kw">function</span>(x) x <span class="op">*</span> factor   <span class="cm"># 'factor' vive en el closure</span>
+}
+
+<span class="nm">doble</span>  <span class="op">&lt;-</span> <span class="fn">multiplicador</span>(<span class="nm">2</span>)
+<span class="nm">triple</span> <span class="op">&lt;-</span> <span class="fn">multiplicador</span>(<span class="nm">3</span>)
+
+<span class="fn">doble</span>(<span class="nm">10</span>)    <span class="cm"># 20: su closure recuerda factor = 2</span>
+<span class="fn">triple</span>(<span class="nm">10</span>)   <span class="cm"># 30: su closure recuerda factor = 3</span>
+
+<span class="cm"># Cada una tiene su propio entorno independiente</span>
+<span class="fn">environment</span>(doble)$factor
+<span class="fn">environment</span>(triple)$factor</pre>
+    <div class="out-wrap" id="o-cl-1"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+
+  <h2>Closure con estado mutable</h2>
+  <p>Combinando closures con <code>&lt;&lt;-</code> podemos encapsular estado, sin exponerlo al entorno global.</p>
+
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">closure_02.R</span><span class="cell-badge badge-exec">Ejecutable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="fn">hacer_contador</span> <span class="op">&lt;-</span> <span class="kw">function</span>(inicio <span class="op">=</span> <span class="nm">0</span>) {
+  <span class="nm">n</span> <span class="op">&lt;-</span> inicio   <span class="cm"># estado encapsulado en el closure</span>
+
+  <span class="fn">list</span>(
+    sumar  <span class="op">=</span> <span class="kw">function</span>(x <span class="op">=</span> <span class="nm">1</span>) { <span class="nm">n</span> <span class="sp">&lt;&lt;-</span> <span class="nm">n</span> <span class="op">+</span> x; <span class="fn">invisible</span>(n) },
+    restar <span class="op">=</span> <span class="kw">function</span>(x <span class="op">=</span> <span class="nm">1</span>) { <span class="nm">n</span> <span class="sp">&lt;&lt;-</span> <span class="nm">n</span> <span class="op">-</span> x; <span class="fn">invisible</span>(n) },
+    ver    <span class="op">=</span> <span class="kw">function</span>()        n,
+    reset  <span class="op">=</span> <span class="kw">function</span>()        { <span class="nm">n</span> <span class="sp">&lt;&lt;-</span> inicio; <span class="fn">invisible</span>(n) }
+  )
+}
+
+<span class="nm">c1</span> <span class="op">&lt;-</span> <span class="fn">hacer_contador</span>(<span class="nm">10</span>)
+<span class="nm">c2</span> <span class="op">&lt;-</span> <span class="fn">hacer_contador</span>(<span class="nm">0</span>)
+
+<span class="nm">c1</span>$<span class="fn">sumar</span>(<span class="nm">5</span>); <span class="nm">c1</span>$<span class="fn">sumar</span>(<span class="nm">3</span>)
+<span class="nm">c1</span>$<span class="fn">ver</span>()    <span class="cm"># 18</span>
+
+<span class="nm">c2</span>$<span class="fn">sumar</span>(<span class="nm">100</span>)
+<span class="nm">c2</span>$<span class="fn">ver</span>()    <span class="cm"># 100 — independiente de c1</span>
+
+<span class="nm">c1</span>$<span class="fn">reset</span>(); <span class="nm">c1</span>$<span class="fn">ver</span>()  <span class="cm"># 10 — vuelve al inicio</span></pre>
+    <div class="out-wrap" id="o-cl-2"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+
+  <div class="callout tip">
+    <div class="callout-title">Cuándo usar closures</div>
+    <p>Son ideales para: fábricas de funciones, estado encapsulado sin clases formales, memoización, y callbacks que necesitan recordar contexto.</p>
+  </div>
+
+  <div class="quiz" id="q-cl">
+    <div class="quiz-q"><code>make_adder &lt;- function(n) function(x) x + n; add10 &lt;- make_adder(10); n &lt;- 999; add10(3)</code> ¿qué devuelve?</div>
+    <div class="quiz-opts">
+      <div class="quiz-opt" onclick="quiz('q-cl',this,false)"><span class="opt-l">A</span>1002 — usa la n global (999 + 3)</div>
+      <div class="quiz-opt" onclick="quiz('q-cl',this,true)"> <span class="opt-l">B</span>13 — el closure recuerda n = 10 de su entorno de definición</div>
+      <div class="quiz-opt" onclick="quiz('q-cl',this,false)"><span class="opt-l">C</span>Error — n está redefinida</div>
+    </div>
+    <div class="quiz-fb" id="qfb-q-cl"></div>
+  </div>
+</div>
+
+<!-- ══ 07 ERRORES ══ -->
+<div class="page" id="p-errores">
+  <div class="eyebrow">Sección 07</div>
+  <h1>Errores frecuentes</h1>
+  <p class="lead">El 90 % de los errores relacionados con el scope siguen los mismos tres patrones. Reconocerlos te ahorra horas.</p>
+
+  <h2>Error 1 — usar &lt;- cuando se quería &lt;&lt;-</h2>
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">err_01.R</span><span class="cell-badge badge-exec">Ejecutable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="nm">log_events</span> <span class="op">&lt;-</span> <span class="fn">c</span>()
+
+<span class="cm"># ❌ &lt;- crea log_events LOCAL en cada llamada, el global no cambia</span>
+<span class="fn">registrar_mal</span> <span class="op">&lt;-</span> <span class="kw">function</span>(ev) {
+  <span class="nm">log_events</span> <span class="op">&lt;-</span> <span class="fn">c</span>(log_events, ev)
+}
+
+<span class="fn">registrar_mal</span>(<span class="st">"inicio"</span>)
+<span class="fn">registrar_mal</span>(<span class="st">"proceso"</span>)
+<span class="fn">cat</span>(<span class="st">"log (mal):"</span>, log_events, <span class="st">"\n"</span>)  <span class="cm"># vacío!</span>
+
+<span class="cm"># ✅ &lt;&lt;- modifica el global</span>
+<span class="fn">registrar_bien</span> <span class="op">&lt;-</span> <span class="kw">function</span>(ev) {
+  <span class="nm">log_events</span> <span class="sp">&lt;&lt;-</span> <span class="fn">c</span>(log_events, ev)
+}
+
+<span class="fn">registrar_bien</span>(<span class="st">"inicio"</span>)
+<span class="fn">registrar_bien</span>(<span class="st">"proceso"</span>)
+<span class="fn">cat</span>(<span class="st">"log (bien):"</span>, log_events, <span class="st">"\n"</span>)</pre>
+    <div class="out-wrap" id="o-err-1"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+
+  <h2>Error 2 — asumir que una variable local existe fuera</h2>
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">err_02.R</span><span class="cell-badge badge-exec">Ejecutable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="fn">preparar</span> <span class="op">&lt;-</span> <span class="kw">function</span>() {
+  resultado <span class="op">&lt;-</span> <span class="nm">42</span>   <span class="cm"># solo vive dentro de preparar()</span>
+}
+
+<span class="fn">preparar</span>()
+
+<span class="cm"># ❌ resultado no existe en el global</span>
+<span class="fn">tryCatch</span>(
+  <span class="fn">cat</span>(resultado),
+  error <span class="op">=</span> <span class="kw">function</span>(e) <span class="fn">cat</span>(<span class="st">"❌"</span>, e$message, <span class="st">"\n"</span>)
+)
+
+<span class="cm"># ✅ fix: devolver el valor con return implícito</span>
+<span class="fn">preparar2</span> <span class="op">&lt;-</span> <span class="kw">function</span>() {
+  resultado <span class="op">&lt;-</span> <span class="nm">42</span>
+  resultado          <span class="cm"># última expresión = retorno</span>
+}
+<span class="nm">resultado</span> <span class="op">&lt;-</span> <span class="fn">preparar2</span>()
+<span class="fn">cat</span>(<span class="st">"✅ resultado ="</span>, resultado, <span class="st">"\n"</span>)</pre>
+    <div class="out-wrap" id="o-err-2"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+
+  <h2>Error 3 — closures en loops con variable compartida</h2>
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">err_03.R</span><span class="cell-badge badge-exec">Ejecutable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="cm"># ❌ todas las funciones ven el mismo i global (el del final)</span>
+<span class="nm">fns</span> <span class="op">&lt;-</span> <span class="fn">vector</span>(<span class="st">"list"</span>, <span class="nm">3</span>)
+<span class="kw">for</span> (i <span class="kw">in</span> <span class="nm">1</span><span class="op">:</span><span class="nm">3</span>) {
+  <span class="nm">fns</span>[[i]] <span class="op">&lt;-</span> <span class="kw">function</span>() i   <span class="cm"># i es libre, apunta al global</span>
+}
+<span class="fn">cat</span>(<span class="st">"Bug:  "</span>, <span class="nm">fns</span>[[<span class="nm">1</span>]](), <span class="nm">fns</span>[[<span class="nm">2</span>]](), <span class="nm">fns</span>[[<span class="nm">3</span>]](), <span class="st">"\n"</span>)
+
+<span class="cm"># ✅ local() crea un entorno nuevo por iteración, captura i</span>
+<span class="kw">for</span> (i <span class="kw">in</span> <span class="nm">1</span><span class="op">:</span><span class="nm">3</span>) {
+  <span class="nm">fns</span>[[i]] <span class="op">&lt;-</span> <span class="kw">local</span>({
+    <span class="nm">j</span> <span class="op">&lt;-</span> i          <span class="cm"># congela el valor actual</span>
+    <span class="kw">function</span>() j
+  })
+}
+<span class="fn">cat</span>(<span class="st">"Bien: "</span>, <span class="nm">fns</span>[[<span class="nm">1</span>]](), <span class="nm">fns</span>[[<span class="nm">2</span>]](), <span class="nm">fns</span>[[<span class="nm">3</span>]](), <span class="st">"\n"</span>)</pre>
+    <div class="out-wrap" id="o-err-3"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+
+  <div class="callout note">
+    <div class="callout-title">Por qué ocurre el bug del loop</div>
+    <p>En el for-loop, <code>i</code> es una variable global que se actualiza en cada iteración. Todas las funciones creadas apuntan a la <em>misma</em> <code>i</code>. Al terminar el loop, <code>i = 3</code> para todas. <code>local()</code> crea un entorno nuevo en cada iteración, por lo que cada <code>j</code> queda "congelada" con su valor.</p>
+  </div>
+</div>
+
+<!-- ══ 08 EJERCICIOS ══ -->
+<div class="page" id="p-ejercicios">
+  <div class="eyebrow">Sección 08</div>
+  <h1>Ejercicios</h1>
+  <p class="lead">Pon a prueba lo que has aprendido. Edita los bloques, ejecútalos y compara con la solución cuando quieras.</p>
+
+  <!-- EJ 1 -->
+  <h2>Ejercicio 1 — ¿Qué vale x?</h2>
+  <p>Sin ejecutar, predice qué imprime cada <code>cat()</code>. Luego ejecuta para comprobarlo.</p>
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">ej01.R</span><span class="cell-badge badge-exec">Ejecutable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="nm">x</span> <span class="op">&lt;-</span> <span class="nm">1</span>
+
+<span class="fn">f</span> <span class="op">&lt;-</span> <span class="kw">function</span>() {
+  <span class="nm">x</span> <span class="op">&lt;-</span> <span class="nm">2</span>
+  <span class="fn">g</span> <span class="op">&lt;-</span> <span class="kw">function</span>() {
+    <span class="nm">x</span> <span class="op">&lt;-</span> <span class="nm">3</span>
+    <span class="fn">cat</span>(<span class="st">"g ve x ="</span>, x, <span class="st">"\n"</span>)   <span class="cm"># ¿cuánto?</span>
+  }
+  <span class="fn">g</span>()
+  <span class="fn">cat</span>(<span class="st">"f ve x ="</span>, x, <span class="st">"\n"</span>)     <span class="cm"># ¿cuánto?</span>
+}
+
+<span class="fn">f</span>()
+<span class="fn">cat</span>(<span class="st">"global x ="</span>, x, <span class="st">"\n"</span>)     <span class="cm"># ¿cuánto?</span></pre>
+    <div class="out-wrap" id="o-ej1"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+  <details style="margin:8px 0 24px">
+    <summary style="cursor:pointer;font-size:13px;color:var(--muted);user-select:none">▸ Explicación</summary>
+    <div class="callout note" style="margin-top:10px">
+      <div class="callout-title">Respuesta</div>
+      <p>Cada función tiene su propia <code>x</code> local: <code>g</code> ve 3, <code>f</code> ve 2, global ve 1. Ninguna modifica las demás porque todas usan <code>&lt;-</code> (local). Tres entornos distintos, tres valores distintos.</p>
+    </div>
+  </details>
+
+  <!-- EJ 2 -->
+  <h2>Ejercicio 2 — Acumulador con closure</h2>
+  <p>Implementa <code>hacer_acumulador()</code>: devuelve una función que, cada vez que se llama con un número, lo suma al total y devuelve el nuevo acumulado. Empieza en 0.</p>
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">ej02.R</span><span class="cell-badge badge-exec">Editable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="fn">hacer_acumulador</span> <span class="op">&lt;-</span> <span class="kw">function</span>() {
+  <span class="nm">total</span> <span class="op">&lt;-</span> <span class="nm">0</span>
+  <span class="kw">function</span>(x) {
+    <span class="cm"># usa &lt;&lt;- para modificar total del closure</span>
+  }
+}
+
+<span class="nm">acc</span> <span class="op">&lt;-</span> <span class="fn">hacer_acumulador</span>()
+<span class="fn">acc</span>(<span class="nm">10</span>)   <span class="cm"># 10</span>
+<span class="fn">acc</span>(<span class="nm">5</span>)    <span class="cm"># 15</span>
+<span class="fn">acc</span>(<span class="nm">3</span>)    <span class="cm"># 18</span></pre>
+    <div class="out-wrap" id="o-ej2"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+  <details style="margin:8px 0 24px">
+    <summary style="cursor:pointer;font-size:13px;color:var(--muted);user-select:none">▸ Ver solución</summary>
+    <div class="cell" style="margin-top:10px">
+      <div class="cell-head">
+        <div class="cell-meta"><span class="cell-filename">ej02_sol.R</span><span class="cell-badge badge-read">Solución</span></div>
+        <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+      </div>
+      <pre class="code-in" contenteditable="false" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="fn">hacer_acumulador</span> <span class="op">&lt;-</span> <span class="kw">function</span>() {
+  <span class="nm">total</span> <span class="op">&lt;-</span> <span class="nm">0</span>
+  <span class="kw">function</span>(x) {
+    <span class="nm">total</span> <span class="sp">&lt;&lt;-</span> <span class="nm">total</span> <span class="op">+</span> x   <span class="cm"># modifica total en el closure</span>
+    total
+  }
+}
+
+<span class="nm">acc</span>  <span class="op">&lt;-</span> <span class="fn">hacer_acumulador</span>()
+<span class="nm">acc2</span> <span class="op">&lt;-</span> <span class="fn">hacer_acumulador</span>()   <span class="cm"># independiente de acc</span>
+
+<span class="fn">acc</span>(<span class="nm">10</span>); <span class="fn">acc</span>(<span class="nm">5</span>); <span class="fn">acc</span>(<span class="nm">3</span>)   <span class="cm"># 10, 15, 18</span>
+<span class="fn">acc2</span>(<span class="nm">100</span>)                  <span class="cm"># 100 — no interfiere</span></pre>
+      <div class="out-wrap" id="o-ej2s"><div class="out-label">salida</div><div class="out-content"></div></div>
+    </div>
+  </details>
+
+  <!-- EJ 3 -->
+  <h2>Ejercicio 3 — Depurar el bug</h2>
+  <p>El siguiente código tiene un bug de scope. Identifícalo, corrígelo y explica por qué ocurría.</p>
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">ej03.R</span><span class="cell-badge badge-exec">Editable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="nm">historial</span> <span class="op">&lt;-</span> <span class="fn">c</span>()
+
+<span class="fn">anotar</span> <span class="op">&lt;-</span> <span class="kw">function</span>(valor) {
+  <span class="nm">historial</span> <span class="op">&lt;-</span> <span class="fn">c</span>(historial, valor)   <span class="cm"># ← ¿está bien esto?</span>
+}
+
+<span class="fn">anotar</span>(<span class="st">"evento A"</span>)
+<span class="fn">anotar</span>(<span class="st">"evento B"</span>)
+<span class="fn">anotar</span>(<span class="st">"evento C"</span>)
+
+<span class="fn">cat</span>(<span class="st">"Historial:"</span>, historial, <span class="st">"\n"</span>)   <span class="cm"># espera 3 eventos</span></pre>
+    <div class="out-wrap" id="o-ej3"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+  <details style="margin:8px 0 24px">
+    <summary style="cursor:pointer;font-size:13px;color:var(--muted);user-select:none">▸ Ver solución</summary>
+    <div class="cell" style="margin-top:10px">
+      <div class="cell-head">
+        <div class="cell-meta"><span class="cell-filename">ej03_sol.R</span><span class="cell-badge badge-read">Solución</span></div>
+        <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">▶ Ejecutar</button></div>
+      </div>
+      <pre class="code-in" contenteditable="false" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="nm">historial</span> <span class="op">&lt;-</span> <span class="fn">c</span>()
+
+<span class="cm"># Bug: &lt;- crea historial LOCAL en cada llamada.</span>
+<span class="cm"># Fix: usar &lt;&lt;- para modificar el global.</span>
+<span class="fn">anotar</span> <span class="op">&lt;-</span> <span class="kw">function</span>(valor) {
+  <span class="nm">historial</span> <span class="sp">&lt;&lt;-</span> <span class="fn">c</span>(historial, valor)
+}
+
+<span class="fn">anotar</span>(<span class="st">"evento A"</span>)
+<span class="fn">anotar</span>(<span class="st">"evento B"</span>)
+<span class="fn">anotar</span>(<span class="st">"evento C"</span>)
+
+<span class="fn">cat</span>(<span class="st">"Historial:"</span>, historial, <span class="st">"\n"</span>)</pre>
+      <div class="out-wrap" id="o-ej3s"><div class="out-label">salida</div><div class="out-content"></div></div>
+    </div>
+  </details>
+</div>
+
+</main>
+
+<!-- WEBR STATUS BAR -->
+<div id="webr-bar">
+  <div class="webr-dot"></div>
+  <span id="webr-msg">Cargando R en el navegador…</span>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { WebR } from 'https://webr.r-wasm.org/v0.4.2/webr.mjs';
+
+/* ── NAVIGATION ── */
+const PAGES = ['intro','entornos','lexical','busqueda','superassign','closures','errores','ejercicios'];
+const seen  = new Set(['intro']);
+
+function goTo(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('p-' + id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick') === `goTo('${id}')`) n.classList.add('active');
+  });
+  seen.add(id);
+  const pct = Math.round(seen.size / PAGES.length * 100);
+  document.getElementById('prog').style.width = pct + '%';
+  document.getElementById('pct').textContent = seen.size + ' / ' + PAGES.length;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ── WEBR ── */
+let webR, ready = false, queue = [];
+
+async function init() {
+  try {
+    webR = new WebR({ quiet: true });
+    await webR.init();
+    ready = true;
+    const bar = document.getElementById('webr-bar');
+    bar.classList.add('ready');
+    document.getElementById('webr-msg').textContent = 'R listo — puedes ejecutar los bloques';
+    setTimeout(() => bar.classList.add('hidden'), 3000);
+    for (const fn of queue) await fn();
+    queue = [];
+  } catch(e) {
+    document.getElementById('webr-msg').textContent = 'Error al cargar R: ' + e.message;
+  }
+}
+
+async function runCell(btn) {
+  const cell    = btn.closest('.cell');
+  const code    = cell.querySelector('.code-in').innerText.replace(/\u200B/g,'').trim();
+  const outWrap = cell.querySelector('.out-wrap');
+  const outEl   = outWrap.querySelector('.out-content');
+
+  btn.disabled = true; btn.textContent = '⏳';
+  outEl.className = 'out-content';
+  outEl.textContent = 'Ejecutando…';
+  outWrap.classList.add('show');
+
+  const exec = async () => {
+    try {
+      const sh  = await new webR.Shelter();
+      const res = await sh.captureR(code, { withAutoprint: true });
+      let out = '';
+      for (const m of res.output) if (m.type === 'stdout' || m.type === 'stderr') out += m.data + '\n';
+      const hasErr = res.output.some(m => m.type === 'stderr' && m.data.trim());
+      outEl.className = 'out-content' + (hasErr ? ' err' : '');
+      outEl.textContent = out.trimEnd() || '(sin salida)';
+      await sh.purge();
+    } catch(e) {
+      outEl.className = 'out-content err';
+      outEl.textContent = 'Error: ' + e.message;
+    }
+    btn.disabled = false; btn.innerHTML = '▶ Ejecutar';
+  };
+
+  ready ? await exec() : (queue.push(exec), document.getElementById('webr-bar').classList.remove('hidden'));
+}
+
+function copyCell(btn) {
+  const text = btn.closest('.cell').querySelector('.code-in').innerText.replace(/\u200B/g,'').trim();
+  navigator.clipboard.writeText(text).then(() => toast('Copiado ✓'));
+}
+
+/* ── QUIZ ── */
+const FB = {
+  'q-lex': { ok: '✓ Correcto. Scoping léxico: <code>f</code> fue definida en el global donde <code>x = 1</code>. La <code>x = 2</code> de <code>g</code> no es visible para <code>f</code>.', no: '✗ Recuerda: R busca donde la función fue <em>definida</em>, no desde dónde se llama. <code>f</code> fue definida en el global.' },
+  'q-sup': { ok: '✓ Correcto. <code>&lt;&lt;-</code> busca <code>x</code> hacia arriba y la encuentra en el global (x=5), luego asigna x*2=10 allí.', no: '✗ <code>&lt;&lt;-</code> dentro de <code>f()</code> busca <code>x</code> en los entornos padre y la modifica. <code>x</code> existe en el global con valor 5, queda en 10.' },
+  'q-cl':  { ok: '✓ Correcto. El closure <code>add10</code> recuerda el entorno de <code>make_adder(10)</code> donde <code>n = 10</code>. La <code>n = 999</code> del global no interfiere.', no: '✗ El closure recuerda su propio entorno de definición. <code>n = 999</code> existe en el global, pero <code>add10</code> ve la <code>n</code> de su closure (10).' },
+};
+
+function quiz(id, el, correct) {
+  const wrap = document.getElementById(id);
+  if (wrap.dataset.done) return;
+  wrap.dataset.done = '1';
+  wrap.querySelectorAll('.quiz-opt').forEach(o => o.classList.add('locked'));
+  el.classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) wrap.querySelectorAll('.quiz-opt:not(.wrong)').forEach(o => o.style.opacity = '.4');
+  const fb = document.getElementById('qfb-' + id);
+  fb.className = 'quiz-fb show ' + (correct ? 'ok' : 'no');
+  fb.innerHTML = FB[id][correct ? 'ok' : 'no'];
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+/* ── EXPOSE & BOOT ── */
+window.goTo     = goTo;
+window.runCell  = runCell;
+window.copyCell = copyCell;
+window.quiz     = quiz;
+
+init();
+</script>
+</body>
+</html>
