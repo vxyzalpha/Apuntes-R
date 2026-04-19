@@ -111,7 +111,7 @@ pre.code-in[contenteditable="true"]:focus{box-shadow:inset 0 0 0 2px rgba(192,57
 #webr-bar.ready .webr-dot{background:#4ade80;animation:none}
 
 /* ── SYNTAX ── */
-.kw{color:#cba6f7}.fn{color:#89b4fa}.st{color:#a6e3a1}.nm{color:#fab387}.cm{color:#45475a;font-style:italic}.op{color:#cdd6f4}.sp{color:#f38ba8}
+.kw{color:#cba6f7}.fn{color:#89b4fa}.st{color:#a6e3a1}.nm{color:#fab387}.cm{color:#9399b2;font-style:italic}.op{color:#cdd6f4}.sp{color:#f38ba8}
 
 /* ── TABLES ── */
 .tbl{width:100%;border-collapse:collapse;margin:18px 0;font-size:14.5px}
@@ -176,6 +176,7 @@ pre.code-in[contenteditable="true"]:focus{box-shadow:inset 0 0 0 2px rgba(192,57
   <div class="sb-other">
     <div class="sb-other-label">También disponible</div>
     <a href="funciones.html">→ Funciones en R</a>
+    <a href="practica_3.html">→ Práctica: células madre</a>
   </div>
 
   <div class="nav-group">Fundamentos</div>
@@ -898,6 +899,157 @@ pre.code-in[contenteditable="true"]:focus{box-shadow:inset 0 0 0 2px rgba(192,57
 
 <span class="fn">cat</span>(<span class="st">"Historial:"</span>, historial, <span class="st">"\n"</span>)</pre>
       <div class="out-wrap" id="o-ej3s"><div class="out-label">salida</div><div class="out-content"></div></div>
+    </div>
+  </details>
+
+  <!-- EJ 4 — BIOTECH -->
+  <h2>Ejercicio 4 — Tasa de Monod rota</h2>
+  <p>La función calcula la tasa de crecimiento según el modelo de Monod, pero tiene un error de alcance. Ejecútala, observa el resultado inesperado y corrígela.</p>
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">ej04_monod.R</span><span class="cell-badge badge-exec">Editable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">&#9654; Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="nm">mu_max</span> <span class="op">&lt;-</span> <span class="nm">0.4</span>   <span class="cm"># tasa maxima de crecimiento (h-1)</span>
+<span class="nm">Ks</span>     <span class="op">&lt;-</span> <span class="nm">0.1</span>   <span class="cm"># constante de semisaturacion (g/L)</span>
+
+<span class="nm">tasa_monod</span> <span class="op">&lt;-</span> <span class="kw">function</span>(S) {
+  <span class="nm">mu_max</span> <span class="op">&lt;-</span> <span class="nm">mu_max</span> <span class="op">*</span> S <span class="op">/</span> (Ks <span class="op">+</span> S)   <span class="cm"># que hace &lt;- aqui?</span>
+  <span class="kw">return</span>(<span class="nm">mu_max</span>)
+}
+
+<span class="fn">cat</span>(<span class="st">"mu con S=0.5:"</span>, <span class="fn">tasa_monod</span>(<span class="nm">0.5</span>), <span class="st">"
+"</span>)
+<span class="fn">cat</span>(<span class="st">"mu con S=0.5:"</span>, <span class="fn">tasa_monod</span>(<span class="nm">0.5</span>), <span class="st">"
+"</span>)   <span class="cm"># por que cambia?</span>
+<span class="fn">cat</span>(<span class="st">"mu_max global:"</span>, <span class="nm">mu_max</span>, <span class="st">"
+"</span>)            <span class="cm"># se ha tocado?</span></pre>
+    <div class="out-wrap" id="o-ej4"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+  <details style="margin:8px 0 24px">
+    <summary style="cursor:pointer;font-size:13px;color:var(--muted);user-select:none">&#9658; Ver solucion</summary>
+    <div class="cell" style="margin-top:10px">
+      <div class="cell-head">
+        <div class="cell-meta"><span class="cell-filename">ej04_sol.R</span><span class="cell-badge badge-read">Solucion</span></div>
+        <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">&#9654; Ejecutar</button></div>
+      </div>
+      <pre class="code-in" contenteditable="false" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="nm">mu_max</span> <span class="op">&lt;-</span> <span class="nm">0.4</span>
+<span class="nm">Ks</span>     <span class="op">&lt;-</span> <span class="nm">0.1</span>
+
+<span class="cm"># Fix: todo entra por argumentos, sin variables libres</span>
+<span class="nm">tasa_monod</span> <span class="op">&lt;-</span> <span class="kw">function</span>(S, mu_max, Ks) {
+  mu_max <span class="op">*</span> S <span class="op">/</span> (Ks <span class="op">+</span> S)
+}
+
+<span class="fn">cat</span>(<span class="st">"mu con S=0.5:"</span>, <span class="fn">tasa_monod</span>(<span class="nm">0.5</span>, <span class="nm">mu_max</span>, <span class="nm">Ks</span>), <span class="st">"
+"</span>)
+<span class="fn">cat</span>(<span class="st">"mu con S=0.5:"</span>, <span class="fn">tasa_monod</span>(<span class="nm">0.5</span>, <span class="nm">mu_max</span>, <span class="nm">Ks</span>), <span class="st">"
+"</span>)   <span class="cm"># estable</span>
+<span class="fn">cat</span>(<span class="st">"mu_max global:"</span>, <span class="nm">mu_max</span>, <span class="st">"
+"</span>)                        <span class="cm"># intacto</span></pre>
+      <div class="out-wrap" id="o-ej4s"><div class="out-label">salida</div><div class="out-content"></div></div>
+    </div>
+  </details>
+
+  <!-- EJ 5 — BIOTECH -->
+  <h2>Ejercicio 5 — Contador de apoptosis</h2>
+  <p>La funcion simula n divisiones y deberia contar cuantas terminan en apoptosis. Siempre devuelve <code>NULL</code>. Por que? Corrigela.</p>
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">ej05_apoptosis.R</span><span class="cell-badge badge-exec">Editable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">&#9654; Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="nm">contar_apoptosis</span> <span class="op">&lt;-</span> <span class="kw">function</span>(n, p_apo <span class="op">=</span> <span class="nm">0.1</span>) {
+  <span class="nm">contador</span> <span class="op">&lt;-</span> <span class="nm">0</span>
+  <span class="kw">for</span> (i <span class="kw">in</span> <span class="nm">1</span><span class="op">:</span>n) {
+    <span class="nm">d</span> <span class="op">&lt;-</span> <span class="fn">sample</span>(<span class="fn">c</span>(<span class="st">"apoptosis"</span>, <span class="st">"division"</span>), <span class="nm">1</span>,
+               prob <span class="op">=</span> <span class="fn">c</span>(p_apo, <span class="nm">1</span> <span class="op">-</span> p_apo))
+    <span class="kw">if</span> (d <span class="op">==</span> <span class="st">"apoptosis"</span>) contador <span class="op">&lt;-</span> contador <span class="op">+</span> <span class="nm">1</span>
+  }
+  <span class="cm"># que falta aqui?</span>
+}
+
+<span class="fn">cat</span>(<span class="st">"Apoptosis en 50 divisiones:"</span>, <span class="fn">contar_apoptosis</span>(<span class="nm">50</span>), <span class="st">"
+"</span>)</pre>
+    <div class="out-wrap" id="o-ej5"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+  <details style="margin:8px 0 24px">
+    <summary style="cursor:pointer;font-size:13px;color:var(--muted);user-select:none">&#9658; Ver solucion</summary>
+    <div class="cell" style="margin-top:10px">
+      <div class="cell-head">
+        <div class="cell-meta"><span class="cell-filename">ej05_sol.R</span><span class="cell-badge badge-read">Solucion</span></div>
+        <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">&#9654; Ejecutar</button></div>
+      </div>
+      <pre class="code-in" contenteditable="false" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="nm">contar_apoptosis</span> <span class="op">&lt;-</span> <span class="kw">function</span>(n, p_apo <span class="op">=</span> <span class="nm">0.1</span>) {
+  <span class="nm">contador</span> <span class="op">&lt;-</span> <span class="nm">0</span>
+  <span class="kw">for</span> (i <span class="kw">in</span> <span class="nm">1</span><span class="op">:</span>n) {
+    <span class="nm">d</span> <span class="op">&lt;-</span> <span class="fn">sample</span>(<span class="fn">c</span>(<span class="st">"apoptosis"</span>, <span class="st">"division"</span>), <span class="nm">1</span>,
+               prob <span class="op">=</span> <span class="fn">c</span>(p_apo, <span class="nm">1</span> <span class="op">-</span> p_apo))
+    <span class="kw">if</span> (d <span class="op">==</span> <span class="st">"apoptosis"</span>) contador <span class="op">&lt;-</span> contador <span class="op">+</span> <span class="nm">1</span>
+  }
+  <span class="kw">return</span>(contador)   <span class="cm"># faltaba devolver el resultado</span>
+}
+
+<span class="fn">set.seed</span>(<span class="nm">42</span>)
+<span class="fn">cat</span>(<span class="st">"Apoptosis en 50 divisiones:"</span>, <span class="fn">contar_apoptosis</span>(<span class="nm">50</span>), <span class="st">"
+"</span>)</pre>
+      <div class="out-wrap" id="o-ej5s"><div class="out-label">salida</div><div class="out-content"></div></div>
+    </div>
+  </details>
+
+  <!-- EJ 6 — BIOTECH -->
+  <h2>Ejercicio 6 — Variable libre en el filtro de viabilidad</h2>
+  <p>Este script funciona en tu sesion porque <code>umbral_viabilidad</code> existe en el global. Pero si un companero lo ejecuta en limpio, falla. Refactorizalo para que sea autonomo.</p>
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">ej06_libre.R</span><span class="cell-badge badge-exec">Editable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">&#9654; Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="nm">umbral_viabilidad</span> <span class="op">&lt;-</span> <span class="nm">50</span>   <span class="cm"># variable libre, solo existe aqui</span>
+
+<span class="nm">celulas_viables</span> <span class="op">&lt;-</span> <span class="kw">function</span>(conteos) {
+  conteos[conteos <span class="op">&gt;</span> umbral_viabilidad]   <span class="cm"># variable libre</span>
+}
+
+<span class="nm">conteos</span> <span class="op">&lt;-</span> <span class="fn">c</span>(<span class="nm">30</span>, <span class="nm">75</span>, <span class="nm">55</span>, <span class="nm">20</span>, <span class="nm">90</span>)
+<span class="fn">cat</span>(<span class="st">"Viables:"</span>, <span class="fn">celulas_viables</span>(conteos), <span class="st">"
+"</span>)
+
+<span class="cm"># Borra la variable global y vuelve a llamar</span>
+<span class="fn">rm</span>(umbral_viabilidad)
+<span class="fn">celulas_viables</span>(conteos)   <span class="cm"># que pasa ahora?</span></pre>
+    <div class="out-wrap" id="o-ej6"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+  <details style="margin:8px 0 24px">
+    <summary style="cursor:pointer;font-size:13px;color:var(--muted);user-select:none">&#9658; Ver solucion</summary>
+    <div class="cell" style="margin-top:10px">
+      <div class="cell-head">
+        <div class="cell-meta"><span class="cell-filename">ej06_sol.R</span><span class="cell-badge badge-read">Solucion</span></div>
+        <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">&#9654; Ejecutar</button></div>
+      </div>
+      <pre class="code-in" contenteditable="false" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="cm"># Fix: umbral entra como argumento con valor por defecto</span>
+<span class="nm">celulas_viables</span> <span class="op">&lt;-</span> <span class="kw">function</span>(conteos, umbral_viabilidad <span class="op">=</span> <span class="nm">50</span>) {
+  conteos[conteos <span class="op">&gt;</span> umbral_viabilidad]
+}
+
+<span class="nm">conteos</span> <span class="op">&lt;-</span> <span class="fn">c</span>(<span class="nm">30</span>, <span class="nm">75</span>, <span class="nm">55</span>, <span class="nm">20</span>, <span class="nm">90</span>)
+<span class="fn">cat</span>(<span class="st">"Viables (umbral 50):"</span>, <span class="fn">celulas_viables</span>(conteos), <span class="st">"
+"</span>)
+<span class="fn">cat</span>(<span class="st">"Viables (umbral 60):"</span>, <span class="fn">celulas_viables</span>(conteos, <span class="nm">60</span>), <span class="st">"
+"</span>)</pre>
+      <div class="out-wrap" id="o-ej6s"><div class="out-label">salida</div><div class="out-content"></div></div>
     </div>
   </details>
 </div>

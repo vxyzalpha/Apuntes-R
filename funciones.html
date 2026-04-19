@@ -108,7 +108,7 @@ pre.code-in[contenteditable="true"]:focus{box-shadow:inset 0 0 0 2px rgba(37,99,
 #webr-bar.ready .webr-dot{background:#4ade80;animation:none}
 
 /* ── SYNTAX ── */
-.kw{color:#cba6f7}.fn{color:#89b4fa}.st{color:#a6e3a1}.nm{color:#fab387}.cm{color:#45475a;font-style:italic}.op{color:#cdd6f4}.sp{color:#f38ba8}
+.kw{color:#cba6f7}.fn{color:#89b4fa}.st{color:#a6e3a1}.nm{color:#fab387}.cm{color:#9399b2;font-style:italic}.op{color:#cdd6f4}.sp{color:#f38ba8}
 
 /* ── TABLES ── */
 .tbl{width:100%;border-collapse:collapse;margin:18px 0;font-size:14.5px}
@@ -162,6 +162,7 @@ pre.code-in[contenteditable="true"]:focus{box-shadow:inset 0 0 0 2px rgba(37,99,
   <div class="sb-other">
     <div class="sb-other-label">También disponible</div>
     <a href="scope.html">→ Alcance de variables</a>
+    <a href="practica_3.html">→ Práctica: células madre</a>
   </div>
 
   <div class="nav-group">Fundamentos</div>
@@ -803,6 +804,149 @@ saludar
 <span class="fn">al_cubo</span>(<span class="nm">3</span>)       <span class="cm"># 27</span>
 <span class="fn">al_cuadrado</span>(<span class="fn">al_cubo</span>(<span class="nm">2</span>))  <span class="cm"># (2³)² = 64</span></pre>
       <div class="out-wrap" id="o-ej3s"><div class="out-label">salida</div><div class="out-content"></div></div>
+    </div>
+  </details>
+
+  <!-- EJ 4 — BIOTECH -->
+  <h2>Ejercicio 4 — Tasa de Monod</h2>
+  <p>Escribe <code>tasa_monod(S, mu_max, Ks)</code> que calcule la tasa de crecimiento segun el modelo de Monod: <code>mu = mu_max * S / (Ks + S)</code>. Calcula la tasa para S = 0.1, 0.5 y 2.0 con mu_max = 0.4 y Ks = 0.1.</p>
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">ej04_monod.R</span><span class="cell-badge badge-exec">Editable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">&#9654; Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="nm">tasa_monod</span> <span class="op">&lt;-</span> <span class="kw">function</span>(S, mu_max, Ks) {
+  <span class="cm"># tu codigo aqui</span>
+}
+
+<span class="cm"># Prueba con distintas concentraciones de sustrato</span>
+<span class="kw">for</span> (S <span class="kw">in</span> <span class="fn">c</span>(<span class="nm">0.1</span>, <span class="nm">0.5</span>, <span class="nm">2.0</span>)) {
+  <span class="fn">cat</span>(<span class="st">"S ="</span>, S, <span class="st">"-> mu ="</span>, <span class="fn">tasa_monod</span>(S, <span class="nm">0.4</span>, <span class="nm">0.1</span>), <span class="st">"
+"</span>)
+}</pre>
+    <div class="out-wrap" id="o-ej4"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+  <details style="margin:8px 0 20px">
+    <summary style="cursor:pointer;font-size:13px;color:var(--muted);user-select:none">&#9658; Ver solucion</summary>
+    <div class="cell" style="margin-top:10px">
+      <div class="cell-head">
+        <div class="cell-meta"><span class="cell-filename">ej04_sol.R</span><span class="cell-badge badge-read">Solucion</span></div>
+        <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">&#9654; Ejecutar</button></div>
+      </div>
+      <pre class="code-in" contenteditable="false" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="nm">tasa_monod</span> <span class="op">&lt;-</span> <span class="kw">function</span>(S, mu_max, Ks) {
+  mu_max <span class="op">*</span> S <span class="op">/</span> (Ks <span class="op">+</span> S)
+}
+
+<span class="kw">for</span> (S <span class="kw">in</span> <span class="fn">c</span>(<span class="nm">0.1</span>, <span class="nm">0.5</span>, <span class="nm">2.0</span>)) {
+  <span class="fn">cat</span>(<span class="st">"S ="</span>, S, <span class="st">"-> mu ="</span>, <span class="fn">tasa_monod</span>(S, <span class="nm">0.4</span>, <span class="nm">0.1</span>), <span class="st">"
+"</span>)
+}
+<span class="cm"># Con S muy alto, mu se aproxima a mu_max = 0.4</span></pre>
+      <div class="out-wrap" id="o-ej4s"><div class="out-label">salida</div><div class="out-content"></div></div>
+    </div>
+  </details>
+
+  <!-- EJ 5 — BIOTECH -->
+  <h2>Ejercicio 5 — Simular una generacion celular</h2>
+  <p>Escribe <code>simular_generacion(madres, sanguineas)</code> que aplique una ronda de divisiones al modelo de celulas madre (apoptosis 0.1, simetrica 0.3, asimetrica 0.6, muerte sangui­nea 0.2) y devuelva una lista con los nuevos valores.</p>
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">ej05_celulas.R</span><span class="cell-badge badge-exec">Editable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">&#9654; Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="nm">simular_generacion</span> <span class="op">&lt;-</span> <span class="kw">function</span>(madres, sanguineas) {
+  <span class="cm"># tu codigo aqui</span>
+  <span class="cm"># pista: usa sample() y un bucle for</span>
+  <span class="cm"># devuelve list(madres=..., sanguineas=...)</span>
+}
+
+<span class="nm">res</span> <span class="op">&lt;-</span> <span class="fn">simular_generacion</span>(<span class="nm">100</span>, <span class="nm">0</span>)
+<span class="fn">cat</span>(<span class="st">"Madres:"</span>, res<span class="op">$</span>madres, <span class="st">"| Sanguineas:"</span>, res<span class="op">$</span>sanguineas, <span class="st">"
+"</span>)</pre>
+    <div class="out-wrap" id="o-ej5"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+  <details style="margin:8px 0 20px">
+    <summary style="cursor:pointer;font-size:13px;color:var(--muted);user-select:none">&#9658; Ver solucion</summary>
+    <div class="cell" style="margin-top:10px">
+      <div class="cell-head">
+        <div class="cell-meta"><span class="cell-filename">ej05_sol.R</span><span class="cell-badge badge-read">Solucion</span></div>
+        <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">&#9654; Ejecutar</button></div>
+      </div>
+      <pre class="code-in" contenteditable="false" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="nm">simular_generacion</span> <span class="op">&lt;-</span> <span class="kw">function</span>(madres, sanguineas) {
+  <span class="kw">for</span> (i <span class="kw">in</span> <span class="nm">1</span><span class="op">:</span><span class="fn">max</span>(<span class="nm">1</span>, madres)) {
+    d <span class="op">&lt;-</span> <span class="fn">sample</span>(<span class="fn">c</span>(<span class="st">"a"</span>,<span class="st">"s"</span>,<span class="st">"x"</span>), <span class="nm">1</span>, prob<span class="op">=</span><span class="fn">c</span>(<span class="nm">0.1</span>,<span class="nm">0.3</span>,<span class="nm">0.6</span>))
+    <span class="kw">if</span>(d<span class="op">==</span><span class="st">"a"</span><span class="op">&amp;&amp;</span>madres<span class="op">&gt;</span><span class="nm">0</span>) madres <span class="op">&lt;-</span> madres<span class="op">-</span><span class="nm">1</span>
+    <span class="kw">if</span>(d<span class="op">==</span><span class="st">"s"</span>) madres <span class="op">&lt;-</span> madres<span class="op">+</span><span class="nm">1</span>
+    <span class="kw">if</span>(d<span class="op">==</span><span class="st">"x"</span>) sanguineas <span class="op">&lt;-</span> sanguineas<span class="op">+</span><span class="nm">1</span>
+  }
+  <span class="kw">if</span>(sanguineas<span class="op">&gt;</span><span class="nm">0</span>) <span class="kw">for</span>(i <span class="kw">in</span> <span class="nm">1</span><span class="op">:</span>sanguineas)
+    <span class="kw">if</span>(<span class="fn">sample</span>(<span class="fn">c</span>(<span class="nm">0</span>,<span class="nm">1</span>),<span class="nm">1</span>,prob<span class="op">=</span><span class="fn">c</span>(<span class="nm">0.2</span>,<span class="nm">0.8</span>))<span class="op">==</span><span class="nm">0</span>) sanguineas <span class="op">&lt;-</span> sanguineas<span class="op">-</span><span class="nm">1</span>
+  <span class="kw">return</span>(<span class="fn">list</span>(madres<span class="op">=</span>madres, sanguineas<span class="op">=</span>sanguineas))
+}
+
+<span class="fn">set.seed</span>(<span class="nm">42</span>)
+<span class="nm">res</span> <span class="op">&lt;-</span> <span class="fn">simular_generacion</span>(<span class="nm">100</span>, <span class="nm">0</span>)
+<span class="fn">cat</span>(<span class="st">"Madres:"</span>, res<span class="op">$</span>madres, <span class="st">"| Sanguineas:"</span>, res<span class="op">$</span>sanguineas, <span class="st">"
+"</span>)</pre>
+      <div class="out-wrap" id="o-ej5s"><div class="out-label">salida</div><div class="out-content"></div></div>
+    </div>
+  </details>
+
+  <!-- EJ 6 — BIOTECH -->
+  <h2>Ejercicio 6 — Una funcion, una responsabilidad</h2>
+  <p>La siguiente funcion hace demasiadas cosas a la vez. Divídela en tres funciones con un solo nombre y una sola responsabilidad cada una.</p>
+  <div class="cell">
+    <div class="cell-head">
+      <div class="cell-meta"><span class="cell-filename">ej06_refactor.R</span><span class="cell-badge badge-exec">Editable</span></div>
+      <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">&#9654; Ejecutar</button></div>
+    </div>
+    <pre class="code-in" contenteditable="true" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="cm"># Esta funcion hace tres cosas: calcula, filtra y formatea</span>
+<span class="nm">analizar_cultivo</span> <span class="op">&lt;-</span> <span class="kw">function</span>(conteos) {
+  media   <span class="op">&lt;-</span> <span class="fn">mean</span>(conteos)
+  limpios <span class="op">&lt;-</span> conteos[<span class="fn">abs</span>(conteos <span class="op">-</span> media) <span class="op">&lt;</span> <span class="nm">2</span> <span class="op">*</span> <span class="fn">sd</span>(conteos)]
+  mensaje <span class="op">&lt;-</span> <span class="fn">paste</span>(<span class="st">"Media:"</span>, <span class="fn">round</span>(media, <span class="nm">2</span>), <span class="st">"| N validos:"</span>, <span class="fn">length</span>(limpios))
+  <span class="kw">return</span>(<span class="fn">list</span>(media<span class="op">=</span>media, limpios<span class="op">=</span>limpios, mensaje<span class="op">=</span>mensaje))
+}
+
+<span class="cm"># Divídela en: calcular_media(), filtrar_outliers(), formatear_resumen()</span>
+<span class="cm"># tu codigo aqui</span>
+
+<span class="nm">conteos</span> <span class="op">&lt;-</span> <span class="fn">c</span>(<span class="nm">12</span>, <span class="nm">15</span>, <span class="nm">14</span>, <span class="nm">98</span>, <span class="nm">13</span>, <span class="nm">11</span>, <span class="nm">16</span>)</pre>
+    <div class="out-wrap" id="o-ej6"><div class="out-label">salida</div><div class="out-content"></div></div>
+  </div>
+  <details style="margin:8px 0 20px">
+    <summary style="cursor:pointer;font-size:13px;color:var(--muted);user-select:none">&#9658; Ver solucion</summary>
+    <div class="cell" style="margin-top:10px">
+      <div class="cell-head">
+        <div class="cell-meta"><span class="cell-filename">ej06_sol.R</span><span class="cell-badge badge-read">Solucion</span></div>
+        <div class="cell-actions"><button class="btn-copy" onclick="copyCell(this)">Copiar</button><button class="btn-run" onclick="runCell(this)">&#9654; Ejecutar</button></div>
+      </div>
+      <pre class="code-in" contenteditable="false" spellcheck="false"><span class="fn">rm</span>(<span class="nm">list</span> <span class="op">=</span> <span class="fn">ls</span>())
+
+<span class="nm">calcular_media</span>   <span class="op">&lt;-</span> <span class="kw">function</span>(x) <span class="fn">mean</span>(x)
+
+<span class="nm">filtrar_outliers</span> <span class="op">&lt;-</span> <span class="kw">function</span>(x, k <span class="op">=</span> <span class="nm">2</span>)
+  x[<span class="fn">abs</span>(x <span class="op">-</span> <span class="fn">mean</span>(x)) <span class="op">&lt;</span> k <span class="op">*</span> <span class="fn">sd</span>(x)]
+
+<span class="nm">formatear_resumen</span> <span class="op">&lt;-</span> <span class="kw">function</span>(media, n_validos)
+  <span class="fn">paste</span>(<span class="st">"Media:"</span>, <span class="fn">round</span>(media, <span class="nm">2</span>), <span class="st">"| N validos:"</span>, n_validos)
+
+<span class="nm">conteos</span> <span class="op">&lt;-</span> <span class="fn">c</span>(<span class="nm">12</span>, <span class="nm">15</span>, <span class="nm">14</span>, <span class="nm">98</span>, <span class="nm">13</span>, <span class="nm">11</span>, <span class="nm">16</span>)
+<span class="nm">media</span>   <span class="op">&lt;-</span> <span class="fn">calcular_media</span>(conteos)
+<span class="nm">limpios</span> <span class="op">&lt;-</span> <span class="fn">filtrar_outliers</span>(conteos)
+<span class="fn">cat</span>(<span class="fn">formatear_resumen</span>(media, <span class="fn">length</span>(limpios)), <span class="st">"
+"</span>)</pre>
+      <div class="out-wrap" id="o-ej6s"><div class="out-label">salida</div><div class="out-content"></div></div>
     </div>
   </details>
 </div>
